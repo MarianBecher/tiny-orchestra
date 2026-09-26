@@ -110,11 +110,11 @@ export interface Bus {
 
 export interface BusOptions {
   /** Default 1. */
-  gain?: number;
+  gain?: number | undefined;
   /** Share sent into the reverb. Default 0.25. */
-  reverb?: number;
+  reverb?: number | undefined;
   /** Stereo position -1..1. Default 0. */
-  pan?: number;
+  pan?: number | undefined;
 }
 
 /** Where a note or a performance goes: a bus or any AudioNode. */
@@ -123,23 +123,23 @@ export type Output = Bus | AudioNode;
 export interface NoteOptions {
   instrument: string;
   /** MIDI note; required for pitched instruments, ignored for unpitched ones. */
-  midi?: number | null;
+  midi?: number | null | undefined;
   /** Absolute AudioContext time. In the past or missing: now. */
-  at?: number;
+  at?: number | undefined;
   /** Seconds. Sustained notes hold (looping if needed) and then release. */
-  duration?: number;
+  duration?: number | undefined;
   /** 0..1, applied quadratically (0.5 = -12 dB). Default 0.7. */
-  velocity?: number;
+  velocity?: number | undefined;
   /** Cents. */
-  detune?: number;
+  detune?: number | undefined;
   /** Stereo position -1..1. */
-  pan?: number;
+  pan?: number | undefined;
   /** Unpitched: which variant. `{ instrument: 'timpani', variant: 'roll' }` plays `timpaniRoll`. */
-  variant?: string;
+  variant?: string | undefined;
   /** Decaying instruments: whether `duration` damps the note. Default from the manifest. */
-  damp?: boolean;
+  damp?: boolean | undefined;
   /** Default: a shared default bus. */
-  out?: Output;
+  out?: Output | undefined;
 }
 
 export interface Voice {
@@ -151,15 +151,15 @@ export interface Voice {
 
 export interface PlayOptions {
   /** Absolute AudioContext time. Default: 50 ms from now. */
-  at?: number;
+  at?: number | undefined;
   /** Overrides `score.bpm`. */
-  bpm?: number;
+  bpm?: number | undefined;
   /** Semitones added to every pitched note. */
-  transpose?: number;
+  transpose?: number | undefined;
   /** Multiplies every velocity. Default 1. */
-  velocity?: number;
-  loop?: boolean;
-  out?: Output;
+  velocity?: number | undefined;
+  loop?: boolean | undefined;
+  out?: Output | undefined;
 }
 
 export interface Performance {
@@ -180,16 +180,16 @@ export interface Performance {
 
 export interface OrchestraOptions {
   /** Folder that holds `manifest.json` and the sample folders. */
-  baseUrl?: string;
+  baseUrl?: string | undefined;
   /** Default: `ctx.destination`. */
-  destination?: AudioNode;
+  destination?: AudioNode | undefined;
   /**
    * The manifest itself (no fetch), or its URL. With a URL and no `baseUrl`,
    * sample files are resolved relative to the manifest.
    */
-  manifest?: Manifest | string;
+  manifest?: Manifest | string | undefined;
   /** Create the shared reverb. Default true. */
-  reverb?: boolean;
+  reverb?: boolean | undefined;
   /** Reverb decay time (-60 dB) in seconds. Default 2.6. */
-  reverbSeconds?: number;
+  reverbSeconds?: number | undefined;
 }
