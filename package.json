@@ -1,0 +1,69 @@
+{
+  "name": "tiny-orchestra",
+  "version": "0.1.0",
+  "description": "A tiny orchestra for the browser: a dependency-free Web Audio sampler with a lookahead score scheduler, plus 25 compact orchestral instruments built from VSCO-2 Community Edition (CC0).",
+  "type": "module",
+  "license": "CC0-1.0",
+  "author": "Marian Becher <marian@becher-home.net>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MarianBecher/tiny-orchestra.git"
+  },
+  "homepage": "https://github.com/MarianBecher/tiny-orchestra#readme",
+  "bugs": {
+    "url": "https://github.com/MarianBecher/tiny-orchestra/issues"
+  },
+  "keywords": [
+    "web-audio",
+    "sampler",
+    "orchestra",
+    "music",
+    "scheduler",
+    "samples",
+    "vsco",
+    "cc0",
+    "game-audio"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./node": {
+      "types": "./dist/node.d.ts",
+      "default": "./dist/node.js"
+    },
+    "./samples/*": "./samples/*",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "samples"
+  ],
+  "scripts": {
+    "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "lint": "eslint .",
+    "build:samples": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/build-samples.ts",
+    "check:samples": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/check-samples.ts",
+    "demo": "npm run build && node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/serve.ts",
+    "check:browser": "npm run build && node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/browser-check.ts",
+    "prepublishOnly": "npm run typecheck && npm run lint && npm test && npm run build"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.20.4",
+    "eslint": "^10.11.0",
+    "globals": "^17.12.0",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.70.1",
+    "vitest": "^5.0.2"
+  }
+}
