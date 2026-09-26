@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tiny-orchestra demo</title>
+<link rel="icon" href="data:,">
+<style>
+  :root {
+    --bg: #f6f3ec; --fg: #1f1d1a; --muted: #6b665c; --line: #d9d3c4;
+    --card: #fffdf8; --accent: #7a3b1d; --accent-fg: #fff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #16150f; --fg: #ece7da; --muted: #9c968a; --line: #3a372f; --card: #1f1d17; --accent: #d08a5a; --accent-fg: #16150f; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.45 system-ui, sans-serif; }
+  main { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font: 600 26px/1.2 Georgia, serif; margin: 0 0 4px; }
+  h2 { font: 600 17px/1.2 Georgia, serif; margin: 28px 0 10px; }
+  p { margin: 0 0 8px; color: var(--muted); }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; padding: 12px; border: 1px solid var(--line); background: var(--card); border-radius: 8px; }
+  button { font: inherit; padding: 6px 12px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 6px; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+  button:disabled { opacity: 0.4; cursor: default; }
+  label { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); }
+  #status { font: 13px/1.4 ui-monospace, monospace; color: var(--muted); }
+  #errors { color: #b3261e; font: 13px/1.4 ui-monospace, monospace; white-space: pre-wrap; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+  .inst { border: 1px solid var(--line); background: var(--card); border-radius: 8px; padding: 10px 12px; }
+  .inst h3 { margin: 0 0 2px; font-size: 15px; }
+  .inst small { color: var(--muted); display: block; margin-bottom: 8px; }
+  .inst .btns { display: flex; flex-wrap: wrap; gap: 6px; }
+  .inst.missing { opacity: 0.45; }
+</style>
+</head>
+<body>
+<main>
+  <h1>tiny-orchestra</h1>
+  <p>A tiny orchestra built from VSCO-2 CE samples (CC0). For listening and judging: every instrument on its own, plus a short piece.</p>
+
+  <div class="bar">
+    <button id="piece" class="primary" disabled>Play piece</button>
+    <button id="stop" disabled>Stop</button>
+    <label><input type="checkbox" id="loop"> Loop</label>
+    <label>Tempo <input type="range" id="bpm" min="50" max="140" value="84"> <span id="bpmv">84</span></label>
+    <label>Volume <input type="range" id="vol" min="0" max="100" value="80"></label>
+    <label>Velocity <input type="range" id="vel" min="5" max="100" value="70"> <span id="velv">0.70</span></label>
+    <button id="swell" disabled>Cymbal swell onto the beat</button>
+    <span id="status">loading ...</span>
+  </div>
+  <div id="errors"></div>
+
+  <h2>Instruments</h2>
+  <div class="grid" id="grid"></div>
+</main>
+<script type="module" src="demo.js"></script>
+</body>
+</html>
