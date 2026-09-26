@@ -4,6 +4,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
+import { INSTRUMENT_NAMES } from '../src/instruments.ts';
 import { samplesDir } from '../src/node.ts';
 import { pickSample } from '../src/pitch.ts';
 import type { Manifest } from '../src/types.ts';
@@ -17,6 +18,10 @@ describe('samples/manifest.json', () => {
     expect(manifest.source).toMatch(/VSCO-2/);
     expect(manifest.format).toMatchObject({ codec: 'mp3', sampleRate: 44100, channels: 1 });
     expect(Object.keys(manifest.instruments)).toHaveLength(25);
+  });
+
+  test('INSTRUMENT_NAMES are exactly the bundled instruments, in order', () => {
+    expect([...INSTRUMENT_NAMES]).toEqual(Object.keys(manifest.instruments));
   });
 
   test.each(Object.entries(manifest.instruments))('%s', (_name, inst) => {

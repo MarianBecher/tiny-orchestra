@@ -13,6 +13,7 @@ import type {
   Bus, BusOptions, Manifest, ManifestInstrument, ManifestSample, NoteOptions, OrchestraOptions,
   Output, Performance, PlayOptions, Score, Voice,
 } from './types.ts';
+import type { InstrumentName } from './instruments.ts';
 
 /** A manifest sample with its decoded audio. */
 export interface LoadedSample extends ManifestSample {
@@ -36,22 +37,28 @@ const LOG = '[tiny-orchestra]';
 
 const nodeOf = (out: Output): AudioNode => ('input' in out ? out.input : out);
 
-export class Orchestra {
+/**
+ * The sampler. `I` is the set of instrument names it accepts: by default the
+ * bundled ones, so a typo is a compile error. With a custom manifest use
+ * `new Orchestra<string>(ctx, { manifest })` (inferred when you pass a
+ * `Manifest<string>` object).
+ */
+export class Orchestra<I extends string = InstrumentName> {
   readonly ctx: BaseAudioContext;
   /** Folder of the sample files, with a trailing slash (or empty). */
   readonly baseUrl: string;
   readonly destination: AudioNode;
 
   private readonly manifestUrl: string;
-  private manifestData: Manifest | null = null;
-  private manifestPromise: Promise<Manifest> | null = null;
+  private manifestData: Manifest<I> | null = null;
+  private manifestPromise: Promise<Manifest<I>> | null = null;
   private readonly loading = new Map<string, Promise<void>>();
   private readonly ready = new Map<string, LoadedInstrument>();
   private readonly fetchLimited = limiter(6);
   private readonly reverbIn: GainNode | null;
   private defaultBus: Bus | null = null;
 
-  constructor(ctx: BaseAudioContext, options: OrchestraOptions = {}) {
+  constructor(ctx: BaseAudioContext, options: OrchestraOptions<I> = {}) {
     const { baseUrl, destination = ctx.destination, manifest, reverb = true, reverbSeconds = 2.6 } = options;
     this.ctx = ctx;
     this.destination = destination;
@@ -69,17 +76,17 @@ export class Orchestra {
   }
 
   /** All instrument names in the manifest (empty until it has loaded). */
-  get instruments(): string[] {
-    return this.manifestData ? Object.keys(this.manifestData.instruments) : [];
+  get instruments(): I[] {
+    return this.manifestData ? (Object.keys(this.manifestData.instruments) as I[]) : [];
   }
 
   /** The loaded manifest, or null until `load()` has fetched it. */
-  get manifest(): Manifest | null {
+  get manifest(): Manifest<I> | null {
     return this.manifestData;
   }
 
   /** True once the instrument is decoded and playable. */
-  has(instrument: string): boolean {
+  has(instrument: I): boolean {
     return this.ready.has(instrument);
   }
 
@@ -88,14 +95,14 @@ export class Orchestra {
    * throws - whatever is missing is simply missing, with a console warning.
    * Calling it again loads nothing twice.
    */
-  async load(instruments?: readonly string[]): Promise<void> {
+  async load(instruments?: readonly I[]): Promise<void> {
     if (!this.manifestPromise) {
       this.manifestPromise = fetch(this.manifestUrl).then(async (r) => {
         if (!r.ok) throw new Error(`manifest.json: HTTP ${r.status}`);
-        return (await r.json()) as Manifest;
+        return (await r.json()) as Manifest<I>;
       });
     }
-    let manifest: Manifest;
+    let manifest: Manifest<I>;
     try {
       manifest = await this.manifestPromise;
       this.manifestData = manifest;
@@ -104,13 +111,14 @@ export class Orchestra {
       this.manifestPromise = null; // try again on the next load()
       return;
     }
-    const all = Object.keys(manifest.instruments);
+    // the manifest decides what exists at runtime, whatever the types say
+    const all = Object.keys(manifest.instruments) as I[];
     const wanted = instruments ?? all;
     for (const n of wanted) if (!all.includes(n)) console.warn(`${LOG} unknown instrument: ${n}`);
     await Promise.all(wanted.filter((n) => all.includes(n)).map((n) => this.loadInstrument(manifest, n)));
   }
 
-  private loadInstrument(manifest: Manifest, name: string): Promise<void> {
+  private loadInstrument(manifest: Manifest<I>, name: I): Promise<void> {
     let p = this.loading.get(name);
     if (!p) {
       const def = manifest.instruments[name]!;
@@ -155,9 +163,9 @@ export class Orchestra {
    * instrument is not loaded (yet) - a game should not crash just because the
    * music is still loading.
    */
-  note(options: NoteOptions): Voice | null {
+  note(options: NoteOptions<I>): Voice | null {
     const { midi, at, duration, velocity = 0.7, out, pan = 0, detune = 0, variant, damp } = options;
-    let { instrument } = options;
+    let instrument: string = options.instrument;
     // Timpani rolls live as an instrument of their own, but can also be
     // addressed as a variant of the timpani.
     if (instrument === 'timpani' && variant === 'roll') instrument = 'timpaniRoll';
@@ -275,7 +283,7 @@ export class Orchestra {
    * Play a score. It is planned only a short stretch ahead (see
    * scheduler.ts), so `stop()` takes effect at once and loops run forever.
    */
-  play(score: Score, options: PlayOptions = {}): Performance {
+  play(score: Score<I>, options: PlayOptions = {}): Performance {
     const { at, bpm, transpose = 0, out, loop = false, velocity = 1 } = options;
     const ctx = this.ctx;
     const tempo = bpm || score.bpm || 120;
@@ -323,7 +331,7 @@ export class Orchestra {
       bpm: tempo,
       now: () => ctx.currentTime,
       schedule: (ev, time, duration) => this.note({
-        instrument: ev.instrument,
+        instrument: ev.instrument as I, // came from the Score<I>
         midi: ev.midi,
         at: time,
         duration,

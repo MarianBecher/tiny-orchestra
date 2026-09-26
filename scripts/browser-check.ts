@@ -113,7 +113,7 @@ const OFFLINE_TEST = async (sampleRate: number): Promise<OfflineResult> => {
   const { Orchestra } = (await import(lib)) as typeof Lib;
   const secs = 10;
   const ctx = new OfflineAudioContext(2, sampleRate * secs, sampleRate);
-  const orch = new Orchestra(ctx, { baseUrl: '/samples/', reverb: false });
+  const orch = new Orchestra<string>(ctx, { baseUrl: '/samples/', reverb: false });
   const internals = orch as unknown as Internals;
   const names = ['woodblock', 'violins', 'harp', 'timpani', 'cymbal', 'tuba'];
   await orch.load(names);

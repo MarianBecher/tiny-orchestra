@@ -88,6 +88,21 @@ bundlers that handle static assets.
 
 `ctx` can be any `BaseAudioContext`, including an `OfflineAudioContext`.
 
+#### Typed instrument names
+
+`Orchestra`, `Score`, `Part` and `NoteOptions` are generic over the instrument
+names they accept. The default is `InstrumentName`, the union of the 25
+bundled instruments (also available at runtime as `INSTRUMENT_NAMES`), so a
+typo is a compile error:
+
+```ts
+orch.note({ instrument: 'violin', midi: 60 });  // error: did you mean 'violins'?
+```
+
+With a manifest of your own, use `string` (or your own union):
+`new Orchestra<string>(ctx, { baseUrl })`. Passing a `Manifest<string>` object
+as `manifest` infers that by itself.
+
 ### `load(instruments?): Promise<void>`
 
 Loads the manifest and the samples (at most 6 downloads at once) and decodes

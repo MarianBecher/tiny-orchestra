@@ -1,5 +1,11 @@
 // Shared types: the manifest written by the sample build, the score format
 // read by the scheduler, and the objects the Orchestra hands out.
+//
+// Everything that names an instrument is generic over the allowed names. The
+// default is the bundled instruments (InstrumentName); for a custom manifest
+// use `string` (or your own union).
+
+import type { InstrumentName } from './instruments.ts';
 
 /** One audio file in the manifest. All times are seconds on the file's own timeline. */
 export interface ManifestSample {
@@ -56,11 +62,11 @@ export interface ManifestFormat {
   loudnessTarget?: number;
 }
 
-export interface Manifest {
+export interface Manifest<I extends string = string> {
   version: number;
   source: string;
   format: ManifestFormat;
-  instruments: Record<string, ManifestInstrument>;
+  instruments: Record<I, ManifestInstrument>;
 }
 
 /**
@@ -75,8 +81,8 @@ export type ScoreNote = [
   variant?: string | undefined,
 ];
 
-export interface Part {
-  instrument: string;
+export interface Part<I extends string = InstrumentName> {
+  instrument: I;
   notes: ScoreNote[];
   /** Default velocity of the part's notes, 0..1. Default 0.7. */
   velocity?: number;
@@ -88,13 +94,13 @@ export interface Part {
   variant?: string;
 }
 
-export interface Score {
+export interface Score<I extends string = InstrumentName> {
   bpm: number;
   /** Default 4. */
   beatsPerBar?: number;
   /** Length in beats; if missing, the notes rounded up to whole bars. */
   lengthBeats?: number;
-  parts: Part[];
+  parts: Part<I>[];
 }
 
 export interface Bus {
@@ -120,8 +126,8 @@ export interface BusOptions {
 /** Where a note or a performance goes: a bus or any AudioNode. */
 export type Output = Bus | AudioNode;
 
-export interface NoteOptions {
-  instrument: string;
+export interface NoteOptions<I extends string = InstrumentName> {
+  instrument: I;
   /** MIDI note; required for pitched instruments, ignored for unpitched ones. */
   midi?: number | null | undefined;
   /** Absolute AudioContext time. In the past or missing: now. */
@@ -178,7 +184,7 @@ export interface Performance {
   stop(fadeSeconds?: number): void;
 }
 
-export interface OrchestraOptions {
+export interface OrchestraOptions<I extends string = InstrumentName> {
   /** Folder that holds `manifest.json` and the sample folders. */
   baseUrl?: string | undefined;
   /** Default: `ctx.destination`. */
@@ -187,7 +193,7 @@ export interface OrchestraOptions {
    * The manifest itself (no fetch), or its URL. With a URL and no `baseUrl`,
    * sample files are resolved relative to the manifest.
    */
-  manifest?: Manifest | string | undefined;
+  manifest?: Manifest<I> | string | undefined;
   /** Create the shared reverb. Default true. */
   reverb?: boolean | undefined;
   /** Reverb decay time (-60 dB) in seconds. Default 2.6. */

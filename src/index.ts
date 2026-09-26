@@ -5,6 +5,7 @@
 // can be tested and reused without an AudioContext.
 
 export { Orchestra, type LoadedSample } from './orchestra.ts';
+export { INSTRUMENT_NAMES, type InstrumentName } from './instruments.ts';
 export { midiToFreq, playbackRate, velocityGain, pickLayer, pickSample, pickVariant, type PitchedSample } from './pitch.ts';
 export {
   beatToTime, timeToBeat, scoreLength, flattenScore, collectEvents, wrapPosition,

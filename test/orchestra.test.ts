@@ -3,7 +3,7 @@
 // attacks land on time, is the job of `npm run check:browser`.
 
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import { Orchestra } from '../src/index.ts';
+import { INSTRUMENT_NAMES, Orchestra, type InstrumentName, type NoteOptions, type Score } from '../src/index.ts';
 import type { Manifest } from '../src/types.ts';
 
 class FakeParam {
@@ -96,7 +96,7 @@ describe('Orchestra', () => {
     stubFetch(urls);
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const { ctx } = fakeContext();
-    const orch = new Orchestra(ctx, { baseUrl: '/audio/samples', reverb: false });
+    const orch = new Orchestra<string>(ctx, { baseUrl: '/audio/samples', reverb: false });
     expect(orch.instruments).toEqual([]);
     await orch.load(['violins', 'broken', 'nope']);
     expect(urls[0]).toBe('/audio/samples/manifest.json');
@@ -117,13 +117,13 @@ describe('Orchestra', () => {
     const urls: string[] = [];
     stubFetch(urls, /never/);
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const orch = new Orchestra(fakeContext().ctx, { manifest: 'https://cdn.example/o/manifest.json', reverb: false });
+    const orch = new Orchestra<string>(fakeContext().ctx, { manifest: 'https://cdn.example/o/manifest.json', reverb: false });
     expect(orch.baseUrl).toBe('https://cdn.example/o/');
     await orch.load(['woodblock']);
     expect(urls).toEqual(['https://cdn.example/o/manifest.json', 'https://cdn.example/o/woodblock/hit1.mp3']);
 
     stubFetch([], /manifest/);
-    const failing = new Orchestra(fakeContext().ctx, { reverb: false });
+    const failing = new Orchestra<string>(fakeContext().ctx, { reverb: false });
     await expect(failing.load()).resolves.toBeUndefined();
     expect(warn).toHaveBeenCalled();
     stubFetch(urls, /never/);
@@ -134,7 +134,7 @@ describe('Orchestra', () => {
   test('a manifest object is used without fetching it', async () => {
     const urls: string[] = [];
     stubFetch(urls);
-    const orch = new Orchestra(fakeContext().ctx, { manifest, baseUrl: 's/', reverb: false });
+    const orch = new Orchestra<string>(fakeContext().ctx, { manifest, baseUrl: 's/', reverb: false });
     expect(orch.instruments).toContain('violins');
     await orch.load(['woodblock']);
     expect(urls).toEqual(['s/woodblock/hit1.mp3']);
@@ -144,7 +144,7 @@ describe('Orchestra', () => {
     stubFetch([]);
     vi.spyOn(console, 'warn').mockImplementation(() => {});
     const { ctx, sources } = fakeContext();
-    const orch = new Orchestra(ctx, { baseUrl: '', reverb: false });
+    const orch = new Orchestra<string>(ctx, { baseUrl: '', reverb: false });
     expect(orch.note({ instrument: 'violins', midi: 60 })).toBeNull(); // not loaded yet
     await orch.load(['violins', 'woodblock']);
     expect(orch.note({ instrument: 'nope', midi: 60 })).toBeNull();
@@ -172,7 +172,7 @@ describe('Orchestra', () => {
   test('voice.stop ramps a separate fader and shortens the voice', async () => {
     stubFetch([]);
     const { ctx } = fakeContext();
-    const orch = new Orchestra(ctx, { reverb: false });
+    const orch = new Orchestra<string>(ctx, { reverb: false });
     await orch.load(['violins']);
     const v = orch.note({ instrument: 'violins', midi: 60, at: 1, duration: 5 })!;
     const end = v.endTime;
@@ -188,7 +188,7 @@ describe('Orchestra', () => {
     try {
       stubFetch([]);
       const { ctx, raw } = fakeContext();
-      const orch = new Orchestra(ctx, { reverb: false });
+      const orch = new Orchestra<string>(ctx, { reverb: false });
       await orch.load(['woodblock']);
       const perf = orch.play({ bpm: 120, parts: [{ instrument: 'woodblock', notes: [[0, null, 1], [2, null, 1]] }] }, { at: 2 });
       expect([perf.startTime, perf.bpm, perf.lengthBeats, perf.loop, perf.endTime]).toEqual([2, 120, 4, false, 4]);
@@ -204,7 +204,7 @@ describe('Orchestra', () => {
 
   test('bus: fade and set ramp the input gain', () => {
     const { ctx } = fakeContext();
-    const orch = new Orchestra(ctx, { reverb: false });
+    const orch = new Orchestra<string>(ctx, { reverb: false });
     const bus = orch.bus({ gain: 0.5, pan: -0.2 });
     const g = bus.input.gain as unknown as FakeParam;
     expect(g.value).toBe(0.5);
@@ -216,5 +216,23 @@ describe('Orchestra', () => {
 
   test('midiToFreq is also a static', () => {
     expect(Orchestra.midiToFreq(57)).toBeCloseTo(220, 9);
+  });
+
+  test('instrument names are typed: the bundled ones by default, any string on request', () => {
+    const { ctx } = fakeContext();
+    const bundled = new Orchestra(ctx, { reverb: false });
+    expect(bundled.has('violins')).toBe(false);
+    // @ts-expect-error - 'violin' is not a bundled instrument
+    expect(bundled.note({ instrument: 'violin', midi: 60 })).toBeNull();
+    // @ts-expect-error - typos in scores are caught, too
+    const typo: Score = { bpm: 90, parts: [{ instrument: 'tympani', notes: [] }] };
+    const ok: NoteOptions = { instrument: 'timpani', variant: 'roll', midi: 45 };
+    const name: InstrumentName = INSTRUMENT_NAMES[0];
+    expect([typo.parts.length, ok.instrument, name]).toEqual([1, 'timpani', 'violins']);
+
+    // a Manifest<string> object makes the orchestra accept any name
+    const custom = new Orchestra(ctx, { manifest, reverb: false });
+    expect(custom.instruments).toContain('broken');
+    expect(custom.has('broken')).toBe(false);
   });
 });

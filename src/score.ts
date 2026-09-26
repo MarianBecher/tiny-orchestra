@@ -19,7 +19,7 @@ export interface ScoreEvent {
 }
 
 /** What `scoreLength` needs of a score. */
-export type ScoreShape = Pick<Score, 'beatsPerBar' | 'lengthBeats'> & { parts?: readonly Pick<Part, 'notes'>[] };
+export type ScoreShape = Pick<Score<string>, 'beatsPerBar' | 'lengthBeats'> & { parts?: readonly Pick<Part<string>, 'notes'>[] };
 
 /** Length of a score in beats: as given, or rounded up to whole bars. */
 export function scoreLength(score: ScoreShape): number {
@@ -44,7 +44,7 @@ export interface FlattenOptions {
  * part and of the call are applied here already, so that the scheduler only
  * has to read off events while the music is running.
  */
-export function flattenScore(score: Pick<Score, 'parts'>, { transpose = 0, velocity = 1 }: FlattenOptions = {}): ScoreEvent[] {
+export function flattenScore(score: Pick<Score<string>, 'parts'>, { transpose = 0, velocity = 1 }: FlattenOptions = {}): ScoreEvent[] {
   const events: ScoreEvent[] = [];
   for (const part of score.parts) {
     const pv = part.velocity ?? 0.7;
