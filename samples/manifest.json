@@ -1,0 +1,2373 @@
+{
+ "version": 1,
+ "instruments": {
+  "violins": {
+   "pitched": true,
+   "sustain": true,
+   "release": 0.35,
+   "gain": 1,
+   "range": [
+    55,
+    86
+   ],
+   "samples": [
+    {
+     "file": "violins/G3-p.mp3",
+     "midi": 55,
+     "vel": 0.5502,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.003
+    },
+    {
+     "file": "violins/G3-f.mp3",
+     "midi": 55,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.001
+    },
+    {
+     "file": "violins/A3-f.mp3",
+     "midi": 57,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.001,
+     "tune": 1
+    },
+    {
+     "file": "violins/B3-f.mp3",
+     "midi": 59,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.002,
+     "tune": -3
+    },
+    {
+     "file": "violins/D4-p.mp3",
+     "midi": 62,
+     "vel": 0.5502,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.003
+    },
+    {
+     "file": "violins/D4-f.mp3",
+     "midi": 62,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.009,
+     "tune": 1
+    },
+    {
+     "file": "violins/Fs4-f.mp3",
+     "midi": 66,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.007,
+     "tune": -3
+    },
+    {
+     "file": "violins/A4-p.mp3",
+     "midi": 69,
+     "vel": 0.5502,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.007,
+     "tune": -1
+    },
+    {
+     "file": "violins/A4-f.mp3",
+     "midi": 69,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.001,
+     "tune": 2
+    },
+    {
+     "file": "violins/C5-f.mp3",
+     "midi": 72,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0
+    },
+    {
+     "file": "violins/E5-p.mp3",
+     "midi": 76,
+     "vel": 0.5502,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": -1
+    },
+    {
+     "file": "violins/E5-f.mp3",
+     "midi": 76,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.004
+    },
+    {
+     "file": "violins/G5-f.mp3",
+     "midi": 79,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.007,
+     "tune": -1
+    },
+    {
+     "file": "violins/B5-p.mp3",
+     "midi": 83,
+     "vel": 0.5502,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.005
+    },
+    {
+     "file": "violins/B5-f.mp3",
+     "midi": 83,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.002,
+     "tune": -1
+    },
+    {
+     "file": "violins/D6-p.mp3",
+     "midi": 86,
+     "vel": 0.5502,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.002,
+     "tune": 3
+    },
+    {
+     "file": "violins/D6-f.mp3",
+     "midi": 86,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.001,
+     "tune": 5
+    }
+   ]
+  },
+  "violas": {
+   "pitched": true,
+   "sustain": true,
+   "release": 0.35,
+   "gain": 1,
+   "range": [
+    48,
+    83
+   ],
+   "samples": [
+    {
+     "file": "violas/C3.mp3",
+     "midi": 48,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.003,
+     "tune": 1
+    },
+    {
+     "file": "violas/E3.mp3",
+     "midi": 52,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": 2
+    },
+    {
+     "file": "violas/G3.mp3",
+     "midi": 55,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": 2
+    },
+    {
+     "file": "violas/B3.mp3",
+     "midi": 59,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": -1
+    },
+    {
+     "file": "violas/D4.mp3",
+     "midi": 62,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.004,
+     "tune": -1
+    },
+    {
+     "file": "violas/F4.mp3",
+     "midi": 65,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": 2
+    },
+    {
+     "file": "violas/A4.mp3",
+     "midi": 69,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0
+    },
+    {
+     "file": "violas/C5.mp3",
+     "midi": 72,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0
+    },
+    {
+     "file": "violas/E5.mp3",
+     "midi": 76,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": -3
+    },
+    {
+     "file": "violas/G5.mp3",
+     "midi": 79,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": 2
+    },
+    {
+     "file": "violas/B5.mp3",
+     "midi": 83,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.01,
+     "tune": 3
+    }
+   ]
+  },
+  "celli": {
+   "pitched": true,
+   "sustain": true,
+   "release": 0.4,
+   "gain": 1,
+   "range": [
+    36,
+    71
+   ],
+   "samples": [
+    {
+     "file": "celli/C2.mp3",
+     "midi": 36,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0
+    },
+    {
+     "file": "celli/E2.mp3",
+     "midi": 40,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": -3
+    },
+    {
+     "file": "celli/G2.mp3",
+     "midi": 43,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.001
+    },
+    {
+     "file": "celli/B2.mp3",
+     "midi": 47,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0
+    },
+    {
+     "file": "celli/D3.mp3",
+     "midi": 50,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": -2
+    },
+    {
+     "file": "celli/F3.mp3",
+     "midi": 53,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": 4
+    },
+    {
+     "file": "celli/A3.mp3",
+     "midi": 57,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": -3
+    },
+    {
+     "file": "celli/C4.mp3",
+     "midi": 60,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": -1
+    },
+    {
+     "file": "celli/E4.mp3",
+     "midi": 64,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0
+    },
+    {
+     "file": "celli/G4.mp3",
+     "midi": 67,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": 1
+    },
+    {
+     "file": "celli/B4.mp3",
+     "midi": 71,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": 2
+    }
+   ]
+  },
+  "basses": {
+   "pitched": true,
+   "sustain": true,
+   "release": 0.4,
+   "gain": 1,
+   "range": [
+    28,
+    59
+   ],
+   "samples": [
+    {
+     "file": "basses/E1.mp3",
+     "midi": 28,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0
+    },
+    {
+     "file": "basses/G1.mp3",
+     "midi": 31,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0
+    },
+    {
+     "file": "basses/As1.mp3",
+     "midi": 34,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.002
+    },
+    {
+     "file": "basses/D2.mp3",
+     "midi": 38,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0
+    },
+    {
+     "file": "basses/Fs2.mp3",
+     "midi": 42,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0
+    },
+    {
+     "file": "basses/A2.mp3",
+     "midi": 45,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": -1
+    },
+    {
+     "file": "basses/Cs3.mp3",
+     "midi": 49,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": -1
+    },
+    {
+     "file": "basses/E3.mp3",
+     "midi": 52,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0
+    },
+    {
+     "file": "basses/Gs3.mp3",
+     "midi": 56,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0
+    },
+    {
+     "file": "basses/B3.mp3",
+     "midi": 59,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": -2
+    }
+   ]
+  },
+  "violinsPizz": {
+   "pitched": true,
+   "sustain": false,
+   "damp": true,
+   "release": 0.12,
+   "gain": 1,
+   "range": [
+    55,
+    86
+   ],
+   "samples": [
+    {
+     "file": "violinsPizz/G3.mp3",
+     "midi": 55,
+     "vel": 1,
+     "offset": 0,
+     "duration": 1.5,
+     "mark": 0,
+     "tune": -1
+    },
+    {
+     "file": "violinsPizz/A3.mp3",
+     "midi": 57,
+     "vel": 1,
+     "offset": 0,
+     "duration": 0.83,
+     "mark": 0,
+     "tune": -1
+    },
+    {
+     "file": "violinsPizz/B3.mp3",
+     "midi": 59,
+     "vel": 1,
+     "offset": 0.01,
+     "duration": 0.73,
+     "mark": 0,
+     "tune": -6
+    },
+    {
+     "file": "violinsPizz/D4.mp3",
+     "midi": 62,
+     "vel": 1,
+     "offset": 0,
+     "duration": 1.26,
+     "mark": 0,
+     "tune": -1
+    },
+    {
+     "file": "violinsPizz/Fs4.mp3",
+     "midi": 66,
+     "vel": 1,
+     "offset": 0.01,
+     "duration": 0.7,
+     "mark": 0,
+     "tune": 3
+    },
+    {
+     "file": "violinsPizz/A4.mp3",
+     "midi": 69,
+     "vel": 1,
+     "offset": 0.01,
+     "duration": 0.63,
+     "mark": 0,
+     "tune": 2
+    },
+    {
+     "file": "violinsPizz/C5.mp3",
+     "midi": 72,
+     "vel": 1,
+     "offset": 0.001,
+     "duration": 0.44,
+     "mark": 0,
+     "tune": 6
+    },
+    {
+     "file": "violinsPizz/E5.mp3",
+     "midi": 76,
+     "vel": 1,
+     "offset": 0.01,
+     "duration": 0.8127,
+     "mark": 0,
+     "tune": 1
+    },
+    {
+     "file": "violinsPizz/G5.mp3",
+     "midi": 79,
+     "vel": 1,
+     "offset": 0.01,
+     "duration": 0.4,
+     "mark": 0,
+     "gain": 1.0685
+    },
+    {
+     "file": "violinsPizz/B5.mp3",
+     "midi": 83,
+     "vel": 1,
+     "offset": 0.01,
+     "duration": 0.38,
+     "mark": 0,
+     "tune": 1
+    },
+    {
+     "file": "violinsPizz/D6.mp3",
+     "midi": 86,
+     "vel": 1,
+     "offset": 0.001,
+     "duration": 0.38,
+     "mark": 0,
+     "tune": 2
+    }
+   ]
+  },
+  "celliPizz": {
+   "pitched": true,
+   "sustain": false,
+   "damp": true,
+   "release": 0.15,
+   "gain": 1,
+   "range": [
+    36,
+    77
+   ],
+   "samples": [
+    {
+     "file": "celliPizz/C2.mp3",
+     "midi": 36,
+     "vel": 1,
+     "offset": 0.01,
+     "duration": 2.01,
+     "mark": 0,
+     "tune": 3
+    },
+    {
+     "file": "celliPizz/E2.mp3",
+     "midi": 40,
+     "vel": 1,
+     "offset": 0.01,
+     "duration": 2.01,
+     "mark": 0,
+     "tune": 2
+    },
+    {
+     "file": "celliPizz/G2.mp3",
+     "midi": 43,
+     "vel": 1,
+     "offset": 0.01,
+     "duration": 2.01,
+     "mark": 0,
+     "tune": 2
+    },
+    {
+     "file": "celliPizz/B2.mp3",
+     "midi": 47,
+     "vel": 1,
+     "offset": 0.01,
+     "duration": 1.48,
+     "mark": 0
+    },
+    {
+     "file": "celliPizz/D3.mp3",
+     "midi": 50,
+     "vel": 1,
+     "offset": 0.01,
+     "duration": 2.01,
+     "mark": 0,
+     "tune": -3
+    },
+    {
+     "file": "celliPizz/F3.mp3",
+     "midi": 53,
+     "vel": 1,
+     "offset": 0.01,
+     "duration": 1.7944,
+     "mark": 0
+    },
+    {
+     "file": "celliPizz/A3.mp3",
+     "midi": 57,
+     "vel": 1,
+     "offset": 0.003,
+     "duration": 1.72,
+     "mark": 0,
+     "tune": 1
+    },
+    {
+     "file": "celliPizz/C4.mp3",
+     "midi": 60,
+     "vel": 1,
+     "offset": 0.01,
+     "duration": 1.56,
+     "mark": 0,
+     "tune": 2
+    },
+    {
+     "file": "celliPizz/E4.mp3",
+     "midi": 64,
+     "vel": 1,
+     "offset": 0.002,
+     "duration": 1.17,
+     "mark": 0.002,
+     "tune": 1
+    },
+    {
+     "file": "celliPizz/G4.mp3",
+     "midi": 67,
+     "vel": 1,
+     "offset": 0.004,
+     "duration": 1.35,
+     "mark": 0.003,
+     "tune": 1
+    },
+    {
+     "file": "celliPizz/B4.mp3",
+     "midi": 71,
+     "vel": 1,
+     "offset": 0.01,
+     "duration": 0.48,
+     "mark": 0,
+     "tune": 2
+    },
+    {
+     "file": "celliPizz/D5.mp3",
+     "midi": 74,
+     "vel": 1,
+     "offset": 0.004,
+     "duration": 0.71,
+     "mark": 0.003
+    },
+    {
+     "file": "celliPizz/F5.mp3",
+     "midi": 77,
+     "vel": 1,
+     "offset": 0.01,
+     "duration": 0.6,
+     "mark": 0
+    }
+   ]
+  },
+  "harp": {
+   "pitched": true,
+   "sustain": false,
+   "damp": false,
+   "release": 0.3,
+   "gain": 1,
+   "range": [
+    28,
+    101
+   ],
+   "samples": [
+    {
+     "file": "harp/E1.mp3",
+     "midi": 28,
+     "vel": 1,
+     "offset": 0.011,
+     "duration": 3.51,
+     "mark": 0.008,
+     "tune": -12
+    },
+    {
+     "file": "harp/B1.mp3",
+     "midi": 35,
+     "vel": 1,
+     "offset": 0.01,
+     "duration": 3.51,
+     "mark": 0.006,
+     "tune": -14
+    },
+    {
+     "file": "harp/F2.mp3",
+     "midi": 41,
+     "vel": 1,
+     "offset": 0.01,
+     "duration": 3.51,
+     "mark": 0.005,
+     "tune": -7
+    },
+    {
+     "file": "harp/C3.mp3",
+     "midi": 48,
+     "vel": 1,
+     "offset": 0,
+     "duration": 3.5,
+     "mark": 0,
+     "tune": -2
+    },
+    {
+     "file": "harp/G3.mp3",
+     "midi": 55,
+     "vel": 1,
+     "offset": 0.013,
+     "duration": 3.51,
+     "mark": 0.01,
+     "tune": -7
+    },
+    {
+     "file": "harp/D4.mp3",
+     "midi": 62,
+     "vel": 1,
+     "offset": 0.013,
+     "duration": 3.51,
+     "mark": 0.01,
+     "tune": -12
+    },
+    {
+     "file": "harp/A4.mp3",
+     "midi": 69,
+     "vel": 1,
+     "offset": 0.01,
+     "duration": 3.51,
+     "mark": 0.01,
+     "tune": -10
+    },
+    {
+     "file": "harp/E5.mp3",
+     "midi": 76,
+     "vel": 1,
+     "offset": 0.012,
+     "duration": 3.51,
+     "mark": 0.01,
+     "tune": -11
+    },
+    {
+     "file": "harp/B5.mp3",
+     "midi": 83,
+     "vel": 1,
+     "offset": 0.011,
+     "duration": 2.32,
+     "mark": 0.01,
+     "tune": -8
+    },
+    {
+     "file": "harp/F6.mp3",
+     "midi": 89,
+     "vel": 1,
+     "offset": 0.01,
+     "duration": 2.03,
+     "mark": 0.003,
+     "tune": -5
+    },
+    {
+     "file": "harp/B6.mp3",
+     "midi": 95,
+     "vel": 1,
+     "offset": 0.01,
+     "duration": 0.9,
+     "mark": 0.008,
+     "tune": -8
+    },
+    {
+     "file": "harp/F7.mp3",
+     "midi": 101,
+     "vel": 1,
+     "offset": 0.012,
+     "duration": 0.4,
+     "mark": 0.009,
+     "tune": -27
+    }
+   ]
+  },
+  "flute": {
+   "pitched": true,
+   "sustain": true,
+   "release": 0.2,
+   "gain": 0.9,
+   "range": [
+    60,
+    93
+   ],
+   "samples": [
+    {
+     "file": "flute/C4.mp3",
+     "midi": 60,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": -1
+    },
+    {
+     "file": "flute/E4.mp3",
+     "midi": 64,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.001
+    },
+    {
+     "file": "flute/A4.mp3",
+     "midi": 69,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0
+    },
+    {
+     "file": "flute/C5.mp3",
+     "midi": 72,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0
+    },
+    {
+     "file": "flute/E5.mp3",
+     "midi": 76,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0
+    },
+    {
+     "file": "flute/A5.mp3",
+     "midi": 81,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.002
+    },
+    {
+     "file": "flute/C6.mp3",
+     "midi": 84,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.002
+    },
+    {
+     "file": "flute/E6.mp3",
+     "midi": 88,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0
+    },
+    {
+     "file": "flute/A6.mp3",
+     "midi": 93,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": 1
+    }
+   ]
+  },
+  "oboe": {
+   "pitched": true,
+   "sustain": true,
+   "release": 0.2,
+   "gain": 0.85,
+   "range": [
+    58,
+    89
+   ],
+   "samples": [
+    {
+     "file": "oboe/As3.mp3",
+     "midi": 58,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": 4
+    },
+    {
+     "file": "oboe/D4.mp3",
+     "midi": 62,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": 3
+    },
+    {
+     "file": "oboe/F4.mp3",
+     "midi": 65,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": 3
+    },
+    {
+     "file": "oboe/As4.mp3",
+     "midi": 70,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": 2
+    },
+    {
+     "file": "oboe/D5.mp3",
+     "midi": 74,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": 2
+    },
+    {
+     "file": "oboe/F5.mp3",
+     "midi": 77,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": 3
+    },
+    {
+     "file": "oboe/As5.mp3",
+     "midi": 82,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": -1
+    },
+    {
+     "file": "oboe/D6.mp3",
+     "midi": 86,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": 1
+    },
+    {
+     "file": "oboe/F6.mp3",
+     "midi": 89,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0
+    }
+   ]
+  },
+  "clarinet": {
+   "pitched": true,
+   "sustain": true,
+   "release": 0.2,
+   "gain": 0.9,
+   "range": [
+    50,
+    89
+   ],
+   "samples": [
+    {
+     "file": "clarinet/D3.mp3",
+     "midi": 50,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.002,
+     "tune": 2
+    },
+    {
+     "file": "clarinet/F3.mp3",
+     "midi": 53,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": 1
+    },
+    {
+     "file": "clarinet/As3.mp3",
+     "midi": 58,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.001,
+     "tune": 1
+    },
+    {
+     "file": "clarinet/D4.mp3",
+     "midi": 62,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.001,
+     "tune": 1
+    },
+    {
+     "file": "clarinet/F4.mp3",
+     "midi": 65,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.003,
+     "tune": 5
+    },
+    {
+     "file": "clarinet/As4.mp3",
+     "midi": 70,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.001,
+     "tune": 2
+    },
+    {
+     "file": "clarinet/D5.mp3",
+     "midi": 74,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.001,
+     "tune": 2
+    },
+    {
+     "file": "clarinet/F5.mp3",
+     "midi": 77,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": 3
+    },
+    {
+     "file": "clarinet/As5.mp3",
+     "midi": 82,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.001,
+     "tune": 3
+    },
+    {
+     "file": "clarinet/D6.mp3",
+     "midi": 86,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.01,
+     "tune": 6
+    },
+    {
+     "file": "clarinet/F6.mp3",
+     "midi": 89,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.005,
+     "tune": 1
+    }
+   ]
+  },
+  "bassoon": {
+   "pitched": true,
+   "sustain": true,
+   "release": 0.2,
+   "gain": 0.9,
+   "range": [
+    34,
+    75
+   ],
+   "samples": [
+    {
+     "file": "bassoon/As1.mp3",
+     "midi": 34,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0
+    },
+    {
+     "file": "bassoon/Cs2.mp3",
+     "midi": 37,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0
+    },
+    {
+     "file": "bassoon/F2.mp3",
+     "midi": 41,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0
+    },
+    {
+     "file": "bassoon/A2.mp3",
+     "midi": 45,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0
+    },
+    {
+     "file": "bassoon/C3.mp3",
+     "midi": 48,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.002
+    },
+    {
+     "file": "bassoon/G3.mp3",
+     "midi": 55,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": 1
+    },
+    {
+     "file": "bassoon/C4.mp3",
+     "midi": 60,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.001
+    },
+    {
+     "file": "bassoon/Ds4.mp3",
+     "midi": 63,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": 1
+    },
+    {
+     "file": "bassoon/Gs4.mp3",
+     "midi": 68,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0
+    },
+    {
+     "file": "bassoon/C5.mp3",
+     "midi": 72,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": 1
+    },
+    {
+     "file": "bassoon/Ds5.mp3",
+     "midi": 75,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.003
+    }
+   ]
+  },
+  "horn": {
+   "pitched": true,
+   "sustain": true,
+   "release": 0.3,
+   "gain": 0.9,
+   "range": [
+    33,
+    77
+   ],
+   "samples": [
+    {
+     "file": "horn/A1.mp3",
+     "midi": 33,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.001,
+     "tune": -10
+    },
+    {
+     "file": "horn/C2.mp3",
+     "midi": 36,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0
+    },
+    {
+     "file": "horn/Ds2.mp3",
+     "midi": 39,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": 1
+    },
+    {
+     "file": "horn/G2.mp3",
+     "midi": 43,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": 4
+    },
+    {
+     "file": "horn/As2.mp3",
+     "midi": 46,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": 1
+    },
+    {
+     "file": "horn/D3.mp3",
+     "midi": 50,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": -4
+    },
+    {
+     "file": "horn/F3.mp3",
+     "midi": 53,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": -2
+    },
+    {
+     "file": "horn/A3.mp3",
+     "midi": 57,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0
+    },
+    {
+     "file": "horn/C4.mp3",
+     "midi": 60,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.001,
+     "tune": -2
+    },
+    {
+     "file": "horn/D5.mp3",
+     "midi": 74,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.002,
+     "tune": 5
+    },
+    {
+     "file": "horn/F5.mp3",
+     "midi": 77,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.002,
+     "tune": 1
+    }
+   ]
+  },
+  "trumpet": {
+   "pitched": true,
+   "sustain": true,
+   "release": 0.25,
+   "gain": 0.75,
+   "range": [
+    53,
+    84
+   ],
+   "samples": [
+    {
+     "file": "trumpet/F3.mp3",
+     "midi": 53,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": 6
+    },
+    {
+     "file": "trumpet/A3.mp3",
+     "midi": 57,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": -2
+    },
+    {
+     "file": "trumpet/C4.mp3",
+     "midi": 60,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.002,
+     "tune": -2
+    },
+    {
+     "file": "trumpet/Ds4.mp3",
+     "midi": 63,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": 3
+    },
+    {
+     "file": "trumpet/G4.mp3",
+     "midi": 67,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": 8
+    },
+    {
+     "file": "trumpet/As4.mp3",
+     "midi": 70,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.001,
+     "tune": 2
+    },
+    {
+     "file": "trumpet/D5.mp3",
+     "midi": 74,
+     "vel": 1,
+     "offset": 0,
+     "loopStart": 1.25,
+     "loopEnd": 2.85,
+     "duration": 3.1,
+     "mark": 0.002
+    },
+    {
+     "file": "trumpet/F5.mp3",
+     "midi": 77,
+     "vel": 1,
+     "offset": 0,
+     "loopStart": 1.25,
+     "loopEnd": 2.85,
+     "duration": 3.1,
+     "mark": 0,
+     "tune": 4
+    },
+    {
+     "file": "trumpet/A5.mp3",
+     "midi": 81,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": -5
+    },
+    {
+     "file": "trumpet/C6.mp3",
+     "midi": 84,
+     "vel": 1,
+     "offset": 0,
+     "loopStart": 1.25,
+     "loopEnd": 2.85,
+     "duration": 3.1,
+     "mark": 0,
+     "tune": 1
+    }
+   ]
+  },
+  "trombone": {
+   "pitched": true,
+   "sustain": true,
+   "release": 0.3,
+   "gain": 0.85,
+   "range": [
+    34,
+    65
+   ],
+   "samples": [
+    {
+     "file": "trombone/As1.mp3",
+     "midi": 34,
+     "vel": 1,
+     "offset": 0.004,
+     "loopStart": 1.254,
+     "loopEnd": 2.854,
+     "duration": 3.104,
+     "mark": 0.003
+    },
+    {
+     "file": "trombone/Cs2.mp3",
+     "midi": 37,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.005
+    },
+    {
+     "file": "trombone/F2.mp3",
+     "midi": 41,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.005,
+     "tune": 1
+    },
+    {
+     "file": "trombone/As2.mp3",
+     "midi": 46,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.001
+    },
+    {
+     "file": "trombone/D3.mp3",
+     "midi": 50,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.002,
+     "tune": -1
+    },
+    {
+     "file": "trombone/F3.mp3",
+     "midi": 53,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.003
+    },
+    {
+     "file": "trombone/C4.mp3",
+     "midi": 60,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.002
+    },
+    {
+     "file": "trombone/Ds4.mp3",
+     "midi": 63,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": 1
+    },
+    {
+     "file": "trombone/F4.mp3",
+     "midi": 65,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0
+    }
+   ]
+  },
+  "tuba": {
+   "pitched": true,
+   "sustain": true,
+   "release": 0.3,
+   "gain": 0.9,
+   "range": [
+    29,
+    62
+   ],
+   "samples": [
+    {
+     "file": "tuba/F1.mp3",
+     "midi": 29,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.008
+    },
+    {
+     "file": "tuba/As1.mp3",
+     "midi": 34,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": -1
+    },
+    {
+     "file": "tuba/Ds2.mp3",
+     "midi": 39,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.009,
+     "tune": 1
+    },
+    {
+     "file": "tuba/As2.mp3",
+     "midi": 46,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.007
+    },
+    {
+     "file": "tuba/D3.mp3",
+     "midi": 50,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": -6
+    },
+    {
+     "file": "tuba/F3.mp3",
+     "midi": 53,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": -5
+    },
+    {
+     "file": "tuba/As3.mp3",
+     "midi": 58,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0.001,
+     "tune": 7
+    },
+    {
+     "file": "tuba/D4.mp3",
+     "midi": 62,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": -2
+    }
+   ]
+  },
+  "glockenspiel": {
+   "pitched": true,
+   "sustain": false,
+   "damp": false,
+   "release": 0.3,
+   "gain": 0.55,
+   "range": [
+    79,
+    108
+   ],
+   "samples": [
+    {
+     "file": "glockenspiel/G5.mp3",
+     "midi": 79,
+     "vel": 1,
+     "offset": 0.004,
+     "duration": 3,
+     "mark": 0,
+     "tune": 8
+    },
+    {
+     "file": "glockenspiel/C6.mp3",
+     "midi": 84,
+     "vel": 1,
+     "offset": 0.004,
+     "duration": 3,
+     "mark": 0,
+     "tune": 12
+    },
+    {
+     "file": "glockenspiel/G6.mp3",
+     "midi": 91,
+     "vel": 1,
+     "offset": 0.004,
+     "duration": 2.77,
+     "mark": 0.001,
+     "tune": 12
+    },
+    {
+     "file": "glockenspiel/C7.mp3",
+     "midi": 96,
+     "vel": 1,
+     "offset": 0.004,
+     "duration": 2.64,
+     "mark": 0.004,
+     "tune": 15
+    },
+    {
+     "file": "glockenspiel/G7.mp3",
+     "midi": 103,
+     "vel": 1,
+     "offset": 0.004,
+     "duration": 2.51,
+     "mark": 0.002,
+     "tune": 16
+    },
+    {
+     "file": "glockenspiel/C8.mp3",
+     "midi": 108,
+     "vel": 1,
+     "offset": 0.007,
+     "duration": 1.067,
+     "mark": 0.003,
+     "tune": 24
+    }
+   ]
+  },
+  "marimba": {
+   "pitched": true,
+   "sustain": false,
+   "damp": false,
+   "release": 0.2,
+   "gain": 0.8,
+   "range": [
+    41,
+    96
+   ],
+   "samples": [
+    {
+     "file": "marimba/F2.mp3",
+     "midi": 41,
+     "vel": 1,
+     "offset": 0.001,
+     "duration": 2.5,
+     "mark": 0,
+     "tune": 2
+    },
+    {
+     "file": "marimba/C3.mp3",
+     "midi": 48,
+     "vel": 1,
+     "offset": 0.002,
+     "duration": 2.5,
+     "mark": 0,
+     "tune": 9
+    },
+    {
+     "file": "marimba/G3.mp3",
+     "midi": 55,
+     "vel": 1,
+     "offset": 0.002,
+     "duration": 2.5,
+     "mark": 0.002,
+     "tune": 2
+    },
+    {
+     "file": "marimba/B3.mp3",
+     "midi": 59,
+     "vel": 1,
+     "offset": 0.003,
+     "duration": 2.5,
+     "mark": 0.003,
+     "tune": 3
+    },
+    {
+     "file": "marimba/F4.mp3",
+     "midi": 65,
+     "vel": 1,
+     "offset": 0.003,
+     "duration": 2.5,
+     "mark": 0.003
+    },
+    {
+     "file": "marimba/C5.mp3",
+     "midi": 72,
+     "vel": 1,
+     "offset": 0.003,
+     "duration": 1.59,
+     "mark": 0.003,
+     "tune": 5
+    },
+    {
+     "file": "marimba/G5.mp3",
+     "midi": 79,
+     "vel": 1,
+     "offset": 0.002,
+     "duration": 1,
+     "mark": 0.002,
+     "tune": -2
+    },
+    {
+     "file": "marimba/B5.mp3",
+     "midi": 83,
+     "vel": 1,
+     "offset": 0.002,
+     "duration": 0.91,
+     "mark": 0,
+     "tune": 1
+    },
+    {
+     "file": "marimba/F6.mp3",
+     "midi": 89,
+     "vel": 1,
+     "offset": 0.001,
+     "duration": 1.16,
+     "mark": 0,
+     "tune": -1
+    },
+    {
+     "file": "marimba/C7.mp3",
+     "midi": 96,
+     "vel": 1,
+     "offset": 0.001,
+     "duration": 0.8,
+     "mark": 0,
+     "tune": 5
+    }
+   ]
+  },
+  "timpani": {
+   "pitched": true,
+   "sustain": false,
+   "damp": false,
+   "release": 0.4,
+   "gain": 1,
+   "range": [
+    41,
+    55
+   ],
+   "samples": [
+    {
+     "file": "timpani/F2.mp3",
+     "midi": 41,
+     "vel": 1,
+     "offset": 0,
+     "duration": 4,
+     "mark": 0,
+     "tune": 46
+    },
+    {
+     "file": "timpani/B2.mp3",
+     "midi": 47,
+     "vel": 1,
+     "offset": 0,
+     "duration": 4,
+     "mark": 0,
+     "tune": -16
+    },
+    {
+     "file": "timpani/Cs3.mp3",
+     "midi": 49,
+     "vel": 1,
+     "offset": 0,
+     "duration": 3.5,
+     "mark": 0,
+     "tune": 49
+    },
+    {
+     "file": "timpani/E3.mp3",
+     "midi": 52,
+     "vel": 1,
+     "offset": 0,
+     "duration": 2.55,
+     "mark": 0,
+     "tune": 44
+    },
+    {
+     "file": "timpani/G3.mp3",
+     "midi": 55,
+     "vel": 1,
+     "offset": 0,
+     "duration": 2.79,
+     "mark": 0,
+     "tune": -44
+    }
+   ]
+  },
+  "timpaniRoll": {
+   "pitched": true,
+   "sustain": true,
+   "release": 0.6,
+   "gain": 0.9,
+   "range": [
+    42,
+    52
+   ],
+   "samples": [
+    {
+     "file": "timpaniRoll/Fs2.mp3",
+     "midi": 42,
+     "vel": 1,
+     "offset": 0,
+     "loopStart": 1.25,
+     "loopEnd": 2.85,
+     "duration": 3.1,
+     "mark": 0,
+     "tune": -29
+    },
+    {
+     "file": "timpaniRoll/A2.mp3",
+     "midi": 45,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": -24
+    },
+    {
+     "file": "timpaniRoll/C3.mp3",
+     "midi": 48,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": -34
+    },
+    {
+     "file": "timpaniRoll/Cs3.mp3",
+     "midi": 49,
+     "vel": 1,
+     "offset": 0,
+     "loopStart": 1.25,
+     "loopEnd": 2.85,
+     "duration": 3.1,
+     "mark": 0,
+     "tune": 11
+    },
+    {
+     "file": "timpaniRoll/E3.mp3",
+     "midi": 52,
+     "vel": 1,
+     "offset": 0.01,
+     "loopStart": 1.26,
+     "loopEnd": 2.86,
+     "duration": 3.11,
+     "mark": 0,
+     "tune": 6
+    }
+   ]
+  },
+  "cymbal": {
+   "pitched": false,
+   "sustain": false,
+   "release": 0.5,
+   "gain": 0.7,
+   "defaultVariant": "crash",
+   "variants": [
+    "crash",
+    "swell",
+    "soft"
+   ],
+   "samples": [
+    {
+     "file": "cymbal/crash1.mp3",
+     "variant": "crash",
+     "offset": 0.01,
+     "duration": 4.51,
+     "mark": 0.004
+    },
+    {
+     "file": "cymbal/crash2.mp3",
+     "variant": "crash",
+     "offset": 0,
+     "duration": 4.5,
+     "mark": 0
+    },
+    {
+     "file": "cymbal/swell1.mp3",
+     "variant": "swell",
+     "offset": 0.01,
+     "duration": 5.73,
+     "mark": 0.01,
+     "peak": 3.22
+    },
+    {
+     "file": "cymbal/soft1.mp3",
+     "variant": "soft",
+     "offset": 0,
+     "duration": 4.5,
+     "mark": 0
+    },
+    {
+     "file": "cymbal/soft2.mp3",
+     "variant": "soft",
+     "offset": 0,
+     "duration": 4.5,
+     "mark": 0
+    }
+   ]
+  },
+  "bassdrum": {
+   "pitched": false,
+   "sustain": false,
+   "release": 0.3,
+   "gain": 1,
+   "defaultVariant": "hit",
+   "variants": [
+    "hit",
+    "soft"
+   ],
+   "samples": [
+    {
+     "file": "bassdrum/hit1.mp3",
+     "variant": "hit",
+     "offset": 0,
+     "duration": 2.2,
+     "mark": 0
+    },
+    {
+     "file": "bassdrum/hit2.mp3",
+     "variant": "hit",
+     "offset": 0,
+     "duration": 2.34,
+     "mark": 0
+    },
+    {
+     "file": "bassdrum/soft1.mp3",
+     "variant": "soft",
+     "offset": 0,
+     "duration": 1.35,
+     "mark": 0
+    }
+   ]
+  },
+  "snareRoll": {
+   "pitched": false,
+   "sustain": true,
+   "release": 0.3,
+   "gain": 0.6,
+   "defaultVariant": "roll",
+   "variants": [
+    "roll"
+   ],
+   "samples": [
+    {
+     "file": "snareRoll/roll1.mp3",
+     "variant": "roll",
+     "offset": 0,
+     "loopStart": 1.25,
+     "loopEnd": 2.85,
+     "duration": 3.1,
+     "mark": 0,
+     "gain": 1.0595
+    }
+   ]
+  },
+  "snare": {
+   "pitched": false,
+   "sustain": false,
+   "release": 0.1,
+   "gain": 0.6,
+   "defaultVariant": "hit",
+   "variants": [
+    "hit"
+   ],
+   "samples": [
+    {
+     "file": "snare/hit1.mp3",
+     "variant": "hit",
+     "offset": 0,
+     "duration": 0.43,
+     "mark": 0,
+     "gain": 1.152
+    },
+    {
+     "file": "snare/hit2.mp3",
+     "variant": "hit",
+     "offset": 0,
+     "duration": 0.46,
+     "mark": 0
+    }
+   ]
+  },
+  "triangle": {
+   "pitched": false,
+   "sustain": false,
+   "release": 0.3,
+   "gain": 0.5,
+   "defaultVariant": "hit",
+   "variants": [
+    "hit",
+    "muted"
+   ],
+   "samples": [
+    {
+     "file": "triangle/hit1.mp3",
+     "variant": "hit",
+     "offset": 0,
+     "duration": 3.5,
+     "mark": 0
+    },
+    {
+     "file": "triangle/hit2.mp3",
+     "variant": "hit",
+     "offset": 0,
+     "duration": 3.5,
+     "mark": 0
+    },
+    {
+     "file": "triangle/muted1.mp3",
+     "variant": "muted",
+     "offset": 0,
+     "duration": 0.52,
+     "mark": 0
+    }
+   ]
+  },
+  "woodblock": {
+   "pitched": false,
+   "sustain": false,
+   "release": 0.05,
+   "gain": 0.6,
+   "defaultVariant": "hit",
+   "variants": [
+    "hit",
+    "claves"
+   ],
+   "samples": [
+    {
+     "file": "woodblock/hit1.mp3",
+     "variant": "hit",
+     "offset": 0.003,
+     "duration": 0.3407,
+     "mark": 0.003,
+     "gain": 1.0432
+    },
+    {
+     "file": "woodblock/hit2.mp3",
+     "variant": "hit",
+     "offset": 0.01,
+     "duration": 0.3407,
+     "mark": 0.004,
+     "gain": 1.0552
+    },
+    {
+     "file": "woodblock/claves1.mp3",
+     "variant": "claves",
+     "offset": 0.004,
+     "duration": 0.274,
+     "mark": 0,
+     "gain": 1.5992
+    },
+    {
+     "file": "woodblock/claves2.mp3",
+     "variant": "claves",
+     "offset": 0.003,
+     "duration": 0.32,
+     "mark": 0.003
+    }
+   ]
+  }
+ },
+ "source": "VSCO-2 Community Edition (CC0), https://github.com/sgossner/VSCO-2-CE",
+ "format": {
+  "codec": "mp3",
+  "kbps": 96,
+  "kbpsLow": 80,
+  "sampleRate": 44100,
+  "channels": 1,
+  "loudnessTarget": -20
+ }
+}
