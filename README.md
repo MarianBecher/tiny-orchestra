@@ -416,6 +416,27 @@ What is checked:
 Not checked: Safari/WebKit (the decoder compensation above exists for exactly
 that case), and of course the sound itself. That is what the demo is for.
 
+## Releasing
+
+Releases are published to npm by GitHub Actions (`.github/workflows/publish.yml`)
+when a plain semver tag without a `v` prefix (e.g. `1.0.0`) is pushed. The
+workflow checks that the tag equals the version in `package.json`, runs the
+checks and the build, and publishes with provenance via npm Trusted
+Publishing (OIDC) - there is no npm token.
+
+1. The very first publish is manual: `npm publish --access public`.
+2. Then configure the trusted publisher on npmjs.com: package settings ->
+   Trusted publisher -> GitHub Actions, repository
+   `MarianBecher/tiny-orchestra`, workflow `publish.yml`.
+3. From then on, a release is
+
+   ```sh
+   npm version patch && git push --follow-tags
+   ```
+
+   which bumps the version, commits, and pushes a tag like `1.0.1` (the
+   repository's `.npmrc` sets `tag-version-prefix=""`).
+
 ## Credits
 
 The samples are edited excerpts from the
