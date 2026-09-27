@@ -97,7 +97,10 @@ code, textarea, pre { font-family: 'Spline Sans Mono', ui-monospace, monospace; 
   user-select: all;
 }
 
-/* Transport ------------------------------------------------------------- */
+/* Pieces and transport --------------------------------------------------- */
+
+.pieces { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+.pieces button[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
 
 .transport {
   display: flex;

@@ -210,8 +210,9 @@ make check-browser  # play the demo and the site, render offline in headless Chr
 ```
 
 Needs Node 22. The demo page plays every instrument and a short piece; the
-site in `site/` shows a longer piece as a score that follows the playback,
-with its code to edit and play again, and is published on GitHub Pages. The
+site in `site/` shows a simple and a longer piece as a score that follows
+the playback, with their code to edit and play again, and is published on
+GitHub Pages. The
 samples are cut, looped, levelled and pitch-checked by a script that
 downloads the VSCO-2 WAVs and encodes them with ffmpeg; how that works, and
 what the manifest fields mean, is written up in

@@ -1,5 +1,5 @@
-// The showcase site: the piece from piece.js as a score view that follows
-// the playback, and its code, which can be edited and played again.
+// The showcase site: a piece from pieces/ as a score view that follows the
+// playback, and its code, which can be edited and played again.
 //
 // The code runs as a real ES module (a blob URL, with 'tiny-orchestra'
 // resolved by the import map in index.html), so what you see is what an app
@@ -8,7 +8,8 @@
 import { Orchestra, encodeWav, midiToNote, nextBarBeat, scoreLength, toMidi } from 'tiny-orchestra';
 
 const $ = (id) => document.getElementById(id);
-const DRAFT_KEY = 'tiny-orchestra-site:draft';
+const PIECES = { simple: './pieces/simple.js', canon: './pieces/canon.js' };
+const draftKey = (id) => `tiny-orchestra-site:draft:${id}`;
 const PX_PER_BEAT = 22;
 const RULER = 28;
 
@@ -25,6 +26,7 @@ const ctx = new AudioContext();
 const orch = new Orchestra(ctx, { baseUrl: './samples/', limiter: true });
 const bus = orch.bus({ gain: 0.9, reverb: 0.3 });
 
+let piece = 'simple';
 let original = '';
 let score = null;
 let perf = null;
@@ -288,8 +290,8 @@ function saveDraft() {
   draftTimer = setTimeout(() => {
     try {
       const code = $('source').value;
-      if (code === original) localStorage.removeItem(DRAFT_KEY);
-      else localStorage.setItem(DRAFT_KEY, code);
+      if (code === original) localStorage.removeItem(draftKey(piece));
+      else localStorage.setItem(draftKey(piece), code);
     } catch { /* no storage: the draft is simply not kept */ }
   }, 300);
 }
@@ -343,11 +345,21 @@ $('wav').onclick = async () => {
   }
 };
 
-async function init() {
-  original = await (await fetch('./piece.js')).text();
+async function select(id) {
+  if (perf) {
+    perf.stop(0.3);
+    stopped();
+  }
+  piece = id;
+  for (const b of document.querySelectorAll('[data-piece]')) b.setAttribute('aria-pressed', String(b.dataset.piece === id));
+  for (const i of ['play', 'tempo', 'wav', 'run', 'reset']) $(i).disabled = true;
+  showError(null);
+  muted.clear();
+  original = await (await fetch(PIECES[id])).text();
   let code = original;
-  try { code = localStorage.getItem(DRAFT_KEY) ?? original; } catch { /* no storage */ }
+  try { code = localStorage.getItem(draftKey(id)) ?? original; } catch { /* no storage */ }
   $('source').value = code;
+  $('roll').scrollLeft = 0;
   highlight();
   try {
     score = await compile(code);
@@ -363,5 +375,7 @@ async function init() {
   $('status').textContent = 'Ready';
 }
 
+for (const b of document.querySelectorAll('[data-piece]')) b.onclick = () => { if (b.dataset.piece !== piece) void select(b.dataset.piece); };
+
 // For the automated check (scripts/browser-check.ts)
-window.__site = { ready: init(), orch, ctx, get perf() { return perf; }, runChanges };
+window.__site = { ready: select(piece), select, orch, ctx, get perf() { return perf; }, runChanges };

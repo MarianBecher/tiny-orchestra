@@ -374,28 +374,40 @@ async function main(): Promise<void> {
     await page.send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
     await page.send('Page.navigate', { url: `http://127.0.0.1:${port}/site/` });
     await page.eval('new Promise((r) => { const w = () => window.__site ? r() : setTimeout(w, 50); w(); })');
-    const site = await page.eval<{ rows: number; parts: number; notes: number; outOfRange: string[]; status: string }>(`(async () => {
+    // both pieces: a row per part, the notes drawn, inside the instrument ranges
+    const sitePieces = await page.eval<{ id: string; rows: number; parts: number; notes: number; outOfRange: string[] }[]>(`(async () => {
       await window.__site.ready;
-      const { orch } = window.__site;
-      const rows = document.querySelectorAll('#names .lane-name').length;
-      const notes = document.querySelectorAll('#notes rect.note').length;
-      const mod = await import(URL.createObjectURL(new Blob([document.getElementById('source').value], { type: 'text/javascript' })));
+      const { orch, select } = window.__site;
       const { toMidi } = await import('/site/lib/index.js');
-      const outOfRange = [];
-      for (const p of mod.default.parts) {
-        const def = orch.manifest.instruments[p.instrument];
-        if (!def) { outOfRange.push(p.instrument + ' unknown'); continue; }
-        for (const n of p.notes) {
-          const m = toMidi(n[1]);
-          if (def.pitched && (m < def.range[0] || m > def.range[1])) outOfRange.push(p.name + ' ' + n[1] + ' at ' + n[0]);
+      const out = [];
+      for (const id of ['simple', 'canon']) {
+        await select(id);
+        const mod = await import(URL.createObjectURL(new Blob([document.getElementById('source').value], { type: 'text/javascript' })));
+        const outOfRange = [];
+        for (const p of mod.default.parts) {
+          const def = orch.manifest.instruments[p.instrument];
+          if (!def) { outOfRange.push(p.instrument + ' unknown'); continue; }
+          for (const n of p.notes) {
+            const m = toMidi(n[1]) + (p.transpose || 0);
+            if (def.pitched && (m < def.range[0] || m > def.range[1])) outOfRange.push(p.name + ' ' + n[1] + ' at ' + n[0]);
+          }
         }
+        out.push({
+          id,
+          rows: document.querySelectorAll('#names .lane-name').length,
+          parts: mod.default.parts.length,
+          notes: document.querySelectorAll('#notes rect.note').length,
+          outOfRange,
+        });
       }
-      return { rows, parts: mod.default.parts.length, notes, outOfRange, status: document.getElementById('status').textContent };
+      return out;
     })()`);
-    console.log(`Site: ${site.rows} rows, ${site.notes} notes, status "${site.status}"`);
-    if (site.rows !== site.parts) problems.push(`site: ${site.rows} rows for ${site.parts} parts`);
-    if (!(site.notes > 100)) problems.push(`site: only ${site.notes} notes drawn`);
-    if (site.outOfRange.length) problems.push(`site: notes out of range: ${site.outOfRange.join(', ')}`);
+    for (const p of sitePieces) {
+      console.log(`Site, ${p.id}: ${p.rows} rows, ${p.notes} notes`);
+      if (p.rows !== p.parts) problems.push(`site ${p.id}: ${p.rows} rows for ${p.parts} parts`);
+      if (!(p.notes > 20)) problems.push(`site ${p.id}: only ${p.notes} notes drawn`);
+      if (p.outOfRange.length) problems.push(`site ${p.id}: notes out of range: ${p.outOfRange.join(', ')}`);
+    }
     const shots = process.env['SCREENSHOTS'];
     const shoot = async (name: string) => {
       if (!shots) return;
