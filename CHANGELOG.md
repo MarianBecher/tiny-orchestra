@@ -7,6 +7,8 @@ break the API).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-27
+
 ### Added
 
 - Scores
@@ -55,12 +57,13 @@ break the API).
   previous behaviour.
 - The README describes the library without a particular use case in mind.
 
-## [0.1.0]
+## [0.1.0] - 2026-09-26
 
 First release: the `Orchestra` sampler with loading, buses, a shared reverb,
 single notes and looping score playback on a lookahead scheduler; 25
 instruments built from VSCO-2 Community Edition; the Node entry
 `tiny-orchestra/node`.
 
-[Unreleased]: https://github.com/MarianBecher/tiny-orchestra/compare/0.1.0...HEAD
+[Unreleased]: https://github.com/MarianBecher/tiny-orchestra/compare/0.2.0...HEAD
+[0.2.0]: https://github.com/MarianBecher/tiny-orchestra/compare/0.1.0...0.2.0
 [0.1.0]: https://github.com/MarianBecher/tiny-orchestra/releases/tag/0.1.0
