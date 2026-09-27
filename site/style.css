@@ -1,0 +1,274 @@
+/* The showcase site. The score view is the one loud element: rows in score
+   order, coloured by instrument family; everything around it stays quiet. */
+
+:root {
+  --paper: #f3f4f6;
+  --sheet: #ffffff;
+  --ink: #1d2433;
+  --muted: #5b6477;
+  --rule: #d6dae1;
+  --faint: #eceef2;
+  --focus: #2e6db4;
+  --winds: #2c7a6a;
+  --brass: #b0731a;
+  --percussion: #7656a3;
+  --keys: #2e6db4;
+  --strings: #b3413c;
+  --error: #a4312c;
+  --row: 44px;
+  --names: 11.5rem;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #14181f;
+    --sheet: #1b2029;
+    --ink: #e6e9ef;
+    --muted: #9aa3b2;
+    --rule: #2c333f;
+    --faint: #222834;
+    --focus: #7fb0ec;
+    --winds: #5fbfa9;
+    --brass: #e0a64a;
+    --percussion: #b294de;
+    --keys: #79a9e6;
+    --strings: #e67c73;
+    --error: #f08a84;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper: #14181f;
+  --sheet: #1b2029;
+  --ink: #e6e9ef;
+  --muted: #9aa3b2;
+  --rule: #2c333f;
+  --faint: #222834;
+  --focus: #7fb0ec;
+  --winds: #5fbfa9;
+  --brass: #e0a64a;
+  --percussion: #b294de;
+  --keys: #79a9e6;
+  --strings: #e67c73;
+  --error: #f08a84;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 1rem/1.55 'Spline Sans', system-ui, sans-serif;
+}
+
+a { color: inherit; text-underline-offset: 0.2em; }
+
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+.intro, main { max-width: 76rem; margin: 0 auto; padding: 0 1rem; }
+
+.intro { padding-top: 3rem; padding-bottom: 1.5rem; }
+
+.intro h1 {
+  margin: 0 0 0.5rem;
+  font-size: clamp(2.25rem, 6vw, 3.75rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.intro p { max-width: 38rem; margin: 0 0 0.75rem; color: var(--muted); font-size: 1.125rem; }
+
+.links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; align-items: center; }
+
+code, textarea, pre { font-family: 'Spline Sans Mono', ui-monospace, monospace; }
+
+.install {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--sheet);
+  color: var(--ink);
+  font-size: 0.9rem;
+  user-select: all;
+}
+
+/* Transport ------------------------------------------------------------- */
+
+.transport {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+button {
+  padding: 0.45rem 1rem;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--sheet);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+button.primary { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+button:disabled { opacity: 0.45; cursor: default; }
+
+.tempo, .loop { display: inline-flex; gap: 0.5rem; align-items: center; color: var(--muted); }
+.tempo input { width: 8rem; accent-color: var(--ink); }
+.tempo output { min-width: 2.5ch; color: var(--ink); font-variant-numeric: tabular-nums; }
+.loop input { accent-color: var(--ink); }
+
+.status { margin: 0 0 0 auto; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+progress {
+  display: block;
+  width: 100%;
+  height: 2px;
+  margin: 0 0 0.75rem;
+  border: 0;
+  background: var(--rule);
+  appearance: none;
+}
+progress::-webkit-progress-bar { background: var(--rule); }
+progress::-webkit-progress-value { background: var(--ink); }
+progress::-moz-progress-bar { background: var(--ink); }
+progress[hidden] { display: none; }
+
+/* Score ----------------------------------------------------------------- */
+
+.score {
+  display: grid;
+  grid-template-columns: var(--names) 1fr;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--sheet);
+  overflow: hidden;
+}
+
+.names { border-right: 1px solid var(--rule); padding-top: 28px; }
+
+.lane-name {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  height: var(--row);
+  padding: 0 0.75rem 0 0.85rem;
+  border: 0;
+  border-left: 4px solid var(--family);
+  border-radius: 0;
+  background: transparent;
+  text-align: left;
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+.lane-name small { color: var(--muted); font-size: 0.75rem; }
+.lane-name[aria-pressed="true"] { opacity: 0.4; text-decoration: line-through; }
+.lane-name + .lane-name { border-top: 1px solid var(--faint); }
+
+.roll { position: relative; overflow-x: auto; overscroll-behavior-x: contain; }
+.roll svg { display: block; }
+
+.playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2px;
+  background: var(--ink);
+  pointer-events: none;
+  will-change: transform;
+}
+
+.ruler-text { fill: var(--muted); font: 500 11px 'Spline Sans', system-ui, sans-serif; }
+.ruler-line { stroke: var(--rule); }
+.beat-line { stroke: var(--faint); }
+.row-line { stroke: var(--faint); }
+.tempo-text { fill: var(--muted); font: italic 500 11px 'Spline Sans', system-ui, sans-serif; }
+
+.note { fill: var(--family); opacity: 0.55; }
+.note.on { opacity: 1; }
+.muted .note { opacity: 0.15; }
+.dynamics { fill: var(--family); opacity: 0.08; }
+
+.hint { margin: 0.5rem 0 0; color: var(--muted); font-size: 0.875rem; }
+
+/* Code ------------------------------------------------------------------ */
+
+.code { margin: 3rem 0 4rem; }
+
+.code-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.code h2 { margin: 0; font-size: 1.5rem; font-weight: 700; letter-spacing: -0.015em; }
+.code-actions { display: flex; gap: 0.5rem; }
+
+.error {
+  margin: 0 0 0.75rem;
+  padding: 0.6rem 0.8rem;
+  border-left: 3px solid var(--error);
+  background: var(--sheet);
+  color: var(--error);
+  white-space: pre-wrap;
+}
+
+.editor {
+  position: relative;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--sheet);
+}
+
+.editor pre, .editor textarea {
+  margin: 0;
+  padding: 1rem 1.1rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  tab-size: 2;
+  white-space: pre;
+  overflow: auto;
+}
+
+.editor pre { position: absolute; inset: 0; color: var(--ink); pointer-events: none; }
+
+.editor textarea {
+  display: block;
+  width: 100%;
+  min-height: 34rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--ink);
+  resize: vertical;
+}
+.editor textarea::selection { background: color-mix(in srgb, var(--focus) 30%, transparent); color: transparent; }
+.editor textarea:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+
+.tok-comment { color: var(--muted); font-style: italic; }
+.tok-string { color: var(--winds); }
+.tok-number { color: var(--brass); }
+.tok-keyword { color: var(--strings); }
+
+@media (max-width: 40rem) {
+  /* the rows keep their height: the notes are drawn to it */
+  :root { --names: 7.5rem; }
+  .lane-name small { display: none; }
+  .status { margin-left: 0; width: 100%; }
+}

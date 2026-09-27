@@ -62,6 +62,7 @@
     "build:samples": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/build-samples.ts",
     "check:samples": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/check-samples.ts",
     "demo": "npm run build && node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/serve.ts",
+    "site": "npm run build && node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/serve.ts /site/",
     "check:browser": "npm run build && node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/browser-check.ts",
     "prepublishOnly": "npm run typecheck && npm run lint && npm test && npm run build"
   },

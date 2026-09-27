@@ -1,7 +1,7 @@
 # Shortcuts for the everyday commands; everything runs through npm.
 
 .DEFAULT_GOAL := help
-.PHONY: help install build check test lint typecheck demo samples check-samples check-browser clean release-patch release-minor
+.PHONY: help install build check test lint typecheck demo site samples check-samples check-browser clean release-patch release-minor
 
 help: ## Show this help
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | sed 's/:.*## /|/' | column -t -s '|'
@@ -25,6 +25,9 @@ typecheck: ## tsc
 
 demo: ## Build and serve the demo page
 	npm run demo
+
+site: ## Build and serve the showcase site
+	npm run site
 
 samples: ## Rebuild the sample set from VSCO-2 CE (needs ffmpeg and the cache)
 	npm run build:samples

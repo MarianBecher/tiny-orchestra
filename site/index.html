@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tiny-orchestra</title>
+<meta name="description" content="A small orchestra for the browser: 25 sampled instruments and a Web Audio sampler that plays notes, scores and MIDI files.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='1' y='3' width='9' height='3' rx='1' fill='%23b3413c'/%3E%3Crect x='5' y='8' width='10' height='3' rx='1' fill='%232e6db4'/%3E%3Crect x='2' y='13' width='6' height='2' rx='1' fill='%232c7a6a'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700&family=Spline+Sans+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="./style.css">
+<!-- The piece in the editor imports 'tiny-orchestra', as it would in an app. -->
+<script type="importmap">{ "imports": { "tiny-orchestra": "./lib/index.js" } }</script>
+<script type="module" src="./app.js"></script>
+</head>
+<body>
+<header class="intro">
+  <h1>tiny-orchestra</h1>
+  <p>
+    A small orchestra for the browser: 25 instruments sampled from the VSCO-2
+    Community Edition and a Web Audio sampler that plays notes, scores and MIDI
+    files. One ES module, no dependencies, public domain.
+  </p>
+  <p class="links">
+    <code class="install">npm install tiny-orchestra</code>
+    <a href="https://github.com/MarianBecher/tiny-orchestra">Source and docs on GitHub</a>
+  </p>
+</header>
+
+<main>
+  <section class="player" aria-label="Player">
+    <div class="transport">
+      <button id="play" class="primary" type="button" disabled>Play</button>
+      <button id="stop" type="button" disabled>Stop</button>
+      <label class="tempo">Tempo
+        <input id="tempo" type="range" min="36" max="132" value="72" disabled>
+        <output id="tempo-value" for="tempo">72</output>
+      </label>
+      <label class="loop"><input id="loop" type="checkbox"> Loop</label>
+      <button id="wav" type="button" disabled>Download WAV</button>
+      <p id="status" class="status" role="status">Loading the instruments…</p>
+    </div>
+    <progress id="progress" max="1" value="0" aria-label="Loading progress"></progress>
+
+    <div class="score" id="score">
+      <div class="names" id="names" aria-label="Parts: select one to mute it"></div>
+      <div class="roll" id="roll" tabindex="0" aria-label="The notes of every part over time">
+        <svg id="notes" role="img" aria-label="Notes of the piece"></svg>
+        <div class="playhead" id="playhead" hidden></div>
+      </div>
+    </div>
+    <p class="hint">Each row is one part, in score order; select a name to mute that part.</p>
+  </section>
+
+  <section class="code" aria-labelledby="code-title">
+    <div class="code-head">
+      <h2 id="code-title">The code of this piece</h2>
+      <div class="code-actions">
+        <button id="run" class="primary" type="button" disabled>Play changes</button>
+        <button id="reset" type="button" disabled>Reset</button>
+      </div>
+    </div>
+    <p id="error" class="error" role="alert" hidden></p>
+    <div class="editor">
+      <pre class="highlight" id="highlight" aria-hidden="true"></pre>
+      <textarea id="source" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Code of the piece"></textarea>
+    </div>
+  </section>
+</main>
+</body>
+</html>
