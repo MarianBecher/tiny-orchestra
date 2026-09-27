@@ -205,10 +205,13 @@ few semitones before it starts to sound like a chipmunk.
 ```sh
 make check          # typecheck, lint, tests
 make demo           # build and serve http://localhost:8321/demo/
-make check-browser  # play the demo and render offline in headless Chromium
+make site           # build and serve the showcase site at http://localhost:8321/site/
+make check-browser  # play the demo and the site, render offline in headless Chromium
 ```
 
-Needs Node 22. The demo page plays every instrument and a few pieces. The
+Needs Node 22. The demo page plays every instrument and a short piece; the
+site in `site/` shows a longer piece as a score that follows the playback,
+with its code to edit and play again, and is published on GitHub Pages. The
 samples are cut, looped, levelled and pitch-checked by a script that
 downloads the VSCO-2 WAVs and encodes them with ffmpeg; how that works, and
 what the manifest fields mean, is written up in
