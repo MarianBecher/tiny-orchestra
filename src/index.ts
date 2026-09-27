@@ -16,7 +16,7 @@ export { noteToMidi, midiToNote, toMidi, sequence, type SequenceOptions } from '
 export { encodeWav, type AudioData, type WavOptions } from './wav.ts';
 export { startScheduler, LOOKAHEAD, LOOKAHEAD_HIDDEN, TICK_MS, type Scheduler, type SchedulerOptions } from './scheduler.ts';
 export { detectOnset, decoderShift, MP3_PRIMING } from './onset.ts';
-export { makeImpulse, type ImpulseOptions } from './reverb.ts';
+export { makeImpulse, makeupGain, type ImpulseOptions } from './reverb.ts';
 export type {
   Manifest, ManifestFormat, ManifestInstrument, ManifestSample,
   Score, Part, ScoreNote,

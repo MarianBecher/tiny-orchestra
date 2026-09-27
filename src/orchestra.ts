@@ -4,9 +4,10 @@
 // modules next to this one; this class only wires them up.
 
 import { decode, dirOf, limiter, withSlash } from './loader.ts';
+import { toMidi } from './notes.ts';
 import { detectOnset, decoderShift } from './onset.ts';
 import { midiToFreq, pickSample, pickVariant, playbackRate, velocityGain } from './pitch.ts';
-import { createBus, createReverb, rampFromNow } from './reverb.ts';
+import { createBus, createLimiter, createReverb, rampFromNow } from './reverb.ts';
 import { startScheduler, type Scheduler } from './scheduler.ts';
 import { beatToTime, flattenScore, scoreLength, timeToBeat, wrapPosition } from './score.ts';
 import type {
@@ -27,6 +28,8 @@ interface LoadedInstrument extends Omit<ManifestInstrument, 'samples'> {
   samples: LoadedSample[];
   /** Last unpitched sample played, for the round robin. */
   last: LoadedSample | null;
+  /** Voices that may still sound, for the voice limit. */
+  voices: Voice[];
 }
 
 /** An instrument being loaded: the whole of it, and each file. */
@@ -63,11 +66,14 @@ export class Orchestra<I extends string = InstrumentName> {
   private readonly loading = new Map<string, Loading>();
   private readonly ready = new Map<string, LoadedInstrument>();
   private readonly fetchLimited = limiter(6);
+  /** Where buses and the reverb go: the limiter, or `destination`. */
+  private readonly output: AudioNode;
   private readonly reverbIn: GainNode | null;
+  private readonly maxVoices: number;
   private defaultBus: Bus | null = null;
 
   constructor(ctx: BaseAudioContext, options: OrchestraOptions<I> = {}) {
-    const { baseUrl, destination = ctx.destination, manifest, reverb = true, reverbSeconds = 2.6 } = options;
+    const { baseUrl, destination = ctx.destination, manifest, reverb = true, reverbSeconds = 2.6, limiter = false, maxVoices = 32 } = options;
     this.ctx = ctx;
     this.destination = destination;
     this.baseUrl = withSlash(baseUrl ?? (typeof manifest === 'string' ? dirOf(manifest) : ''));
@@ -76,7 +82,9 @@ export class Orchestra<I extends string = InstrumentName> {
       this.manifestData = manifest;
       this.manifestPromise = Promise.resolve(manifest);
     }
-    this.reverbIn = reverb ? createReverb(ctx, destination, reverbSeconds) : null;
+    this.output = limiter ? createLimiter(ctx, destination) : destination;
+    this.reverbIn = reverb ? createReverb(ctx, this.output, reverbSeconds) : null;
+    this.maxVoices = maxVoices > 0 ? maxVoices : 32;
   }
 
   static midiToFreq(midi: number): number {
@@ -165,7 +173,7 @@ export class Orchestra<I extends string = InstrumentName> {
         return;
       }
       // An instrument that lacks only some samples stays usable with the rest.
-      this.ready.set(name, { ...def, name, samples, last: null });
+      this.ready.set(name, { ...def, name, samples, last: null, voices: [] });
     });
     this.loading.set(name, entry);
     return entry;
@@ -215,20 +223,21 @@ export class Orchestra<I extends string = InstrumentName> {
 
   /**
    * A mixer channel: dry to `destination`, plus a `reverb` share into the
-   * shared reverb. Give a game's music and its effects one each, so they can
-   * be faded separately.
+   * shared reverb. Give each group of sounds (say, the music and the sound
+   * effects) a bus of its own, so they can be faded separately.
    */
   bus(options: BusOptions = {}): Bus {
-    return createBus(this.ctx, this.destination, this.reverbIn, options);
+    return createBus(this.ctx, this.output, this.reverbIn, options);
   }
 
   /**
    * One note at the absolute audio-clock time `at`. Returns null when the
-   * instrument is not loaded (yet) - a game should not crash just because the
-   * music is still loading.
+   * instrument is not loaded (yet) - an app should not break just because
+   * its samples are still on the way.
    */
   note(options: NoteOptions<I>): Voice | null {
-    const { midi, at, duration, velocity = 0.7, out, pan = 0, detune = 0, variant, damp } = options;
+    const { at, duration, velocity = 0.7, velocityEnd, out, pan = 0, detune = 0, variant, damp } = options;
+    const midi = toMidi(options.midi);
     let instrument: string = options.instrument;
     // Timpani rolls live as an instrument of their own, but can also be
     // addressed as a variant of the timpani.
@@ -239,11 +248,15 @@ export class Orchestra<I extends string = InstrumentName> {
     const now = ctx.currentTime;
     const t = Math.max(at !== undefined && Number.isFinite(at) ? at : now, now);
 
+    const hasDur = duration !== undefined && Number.isFinite(duration) && duration > 0;
+    const velEnd = hasDur && velocityEnd !== undefined && Number.isFinite(velocityEnd) ? velocityEnd : undefined;
+
     let s: LoadedSample | null;
     let rate: number;
     if (inst.pitched) {
-      if (typeof midi !== 'number' || !Number.isFinite(midi)) return null;
-      s = pickSample(inst.samples, midi, velocity);
+      if (midi === null || !Number.isFinite(midi)) return null;
+      // a crescendo uses the layer of its loudest point
+      s = pickSample(inst.samples, midi, Math.max(velocity, velEnd ?? 0));
       if (!s) return null;
       rate = playbackRate(midi, s.midi ?? midi, detune, s.tune || 0);
     } else {
@@ -258,8 +271,9 @@ export class Orchestra<I extends string = InstrumentName> {
     const baseOffset = s.offset ?? 0;
     const offset = baseOffset + shift;
     const release = Math.max(0.01, inst.release ?? 0.3);
-    const amp = (inst.gain ?? 1) * (s.gain ?? 1) * velocityGain(velocity, s.vel ?? 1);
-    const hasDur = duration !== undefined && Number.isFinite(duration) && duration > 0;
+    const level = (inst.gain ?? 1) * (s.gain ?? 1);
+    const amp = level * velocityGain(velocity, s.vel ?? 1);
+    const ampEnd = velEnd === undefined ? amp : level * velocityGain(velEnd, s.vel ?? 1);
 
     const src = ctx.createBufferSource();
     src.buffer = buf;
@@ -269,6 +283,7 @@ export class Orchestra<I extends string = InstrumentName> {
     const attack = inst.sustain ? ATTACK : ATTACK_HIT;
     env.gain.setValueAtTime(0, t);
     env.gain.linearRampToValueAtTime(amp, t + attack);
+    if (hasDur && ampEnd !== amp) env.gain.linearRampToValueAtTime(ampEnd, t + Math.max(duration, attack * 2));
     src.connect(env).connect(stopper);
     let tail: AudioNode = stopper;
     if (pan) {
@@ -298,14 +313,15 @@ export class Orchestra<I extends string = InstrumentName> {
 
     let endAt = t + natural + 0.02;
     if (releaseAt !== null) {
-      const ra = Math.max(releaseAt, t + attack);
-      env.gain.setValueAtTime(amp, ra);
+      const ra = Math.max(releaseAt, t + attack * 2);
+      env.gain.setValueAtTime(ampEnd, ra);
       // Decay exponentially: with a time constant of release/5 the note is
       // at -43 dB after `release`, and inaudible when it is cut after that.
       env.gain.setTargetAtTime(0, ra, release / 5);
       const stopAt = ra + release * 1.3;
       endAt = src.loop ? stopAt : Math.min(endAt, stopAt);
     }
+    this.limitVoices(inst, t);
     src.start(t, offset);
     src.stop(endAt);
 
@@ -317,7 +333,7 @@ export class Orchestra<I extends string = InstrumentName> {
       stopper.disconnect();
       if (tail !== stopper) tail.disconnect();
     };
-    return {
+    const voice: Voice = {
       startTime: t,
       get endTime() {
         return endTime;
@@ -341,6 +357,20 @@ export class Orchestra<I extends string = InstrumentName> {
         }
       },
     };
+    inst.voices.push(voice);
+    return voice;
+  }
+
+  /** Make room for a voice at `t`: fade out the oldest if too many sound then. */
+  private limitVoices(inst: LoadedInstrument, t: number): void {
+    const now = this.ctx.currentTime;
+    inst.voices = inst.voices.filter((v) => v.endTime > now);
+    const sounding = inst.voices.filter((v) => v.startTime <= t && v.endTime > t);
+    if (sounding.length < this.maxVoices) return;
+    let oldest = sounding[0]!;
+    for (const v of sounding) if (v.startTime < oldest.startTime) oldest = v;
+    oldest.stop(t, 0.05);
+    inst.voices = inst.voices.filter((v) => v !== oldest);
   }
 
   /**

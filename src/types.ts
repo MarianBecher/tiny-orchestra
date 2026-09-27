@@ -128,14 +128,16 @@ export type Output = Bus | AudioNode;
 
 export interface NoteOptions<I extends string = InstrumentName> {
   instrument: I;
-  /** MIDI note; required for pitched instruments, ignored for unpitched ones. */
-  midi?: number | null | undefined;
+  /** MIDI note or note name (`"C4"`); required for pitched instruments, ignored for unpitched ones. */
+  midi?: number | string | null | undefined;
   /** Absolute AudioContext time. In the past or missing: now. */
   at?: number | undefined;
   /** Seconds. Sustained notes hold (looping if needed) and then release. */
   duration?: number | undefined;
   /** 0..1, applied quadratically (0.5 = -12 dB). Default 0.7. */
   velocity?: number | undefined;
+  /** With `duration`: velocity at the end of the note, reached by a linear ramp (crescendo, diminuendo). */
+  velocityEnd?: number | undefined;
   /** Cents. */
   detune?: number | undefined;
   /** Stereo position -1..1. */
@@ -205,4 +207,14 @@ export interface OrchestraOptions<I extends string = InstrumentName> {
   reverb?: boolean | undefined;
   /** Reverb decay time (-60 dB) in seconds. Default 2.6. */
   reverbSeconds?: number | undefined;
+  /**
+   * Put a limiter in front of `destination`, so that many loud notes at once
+   * do not clip. Default false.
+   */
+  limiter?: boolean | undefined;
+  /**
+   * Most voices of one instrument sounding at the same time; beyond that the
+   * oldest one is faded out quickly. Default 32; `Infinity` for no limit.
+   */
+  maxVoices?: number | undefined;
 }

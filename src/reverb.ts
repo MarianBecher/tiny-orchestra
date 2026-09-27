@@ -83,9 +83,41 @@ export function rampFromNow(ctx: BaseAudioContext, param: AudioParam, target: nu
   param.linearRampToValueAtTime(target, t + seconds);
 }
 
+const LIMIT_DB = -3;
+const LIMIT_RATIO = 20;
+
 /**
- * A mixer channel: level, pan, reverb share. A game's music and its sound
- * effects each get their own, so they can be faded independently.
+ * The automatic makeup gain of a DynamicsCompressorNode (Web Audio spec):
+ * the inverse of what the curve does to a full-scale signal, to the 0.6.
+ */
+export function makeupGain(thresholdDb: number, ratio: number): number {
+  const fullScaleDb = thresholdDb - thresholdDb / ratio; // knee 0
+  return Math.pow(Math.pow(10, -fullScaleDb / 20), 0.6);
+}
+
+/**
+ * A limiter in front of `destination`: a fast compressor with a high ratio
+ * that only acts near full scale, so that many loud notes at once do not
+ * clip. The compressor's makeup gain is undone, so that everything below
+ * the threshold passes unchanged. Browsers delay the signal by their
+ * compressor lookahead (6 ms in Chromium). Returns the node to connect into.
+ */
+export function createLimiter(ctx: BaseAudioContext, destination: AudioNode): AudioNode {
+  const comp = ctx.createDynamicsCompressor();
+  comp.threshold.value = LIMIT_DB;
+  comp.knee.value = 0;
+  comp.ratio.value = LIMIT_RATIO;
+  comp.attack.value = 0.002;
+  comp.release.value = 0.15;
+  const trim = ctx.createGain();
+  trim.gain.value = 1 / makeupGain(LIMIT_DB, LIMIT_RATIO);
+  comp.connect(trim).connect(destination);
+  return comp;
+}
+
+/**
+ * A mixer channel: level, pan, reverb share. Separate groups of sounds each
+ * get their own, so they can be faded independently.
  */
 export function createBus(
   ctx: BaseAudioContext,

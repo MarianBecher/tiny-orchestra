@@ -1,5 +1,5 @@
 import { expect, test, vi } from 'vitest';
-import { makeImpulse, rampFromNow } from '../src/reverb.ts';
+import { makeImpulse, makeupGain, rampFromNow } from '../src/reverb.ts';
 import { close } from './helpers.ts';
 
 test('makeImpulse: stereo, predelay, decaying, energy 1, deterministic', () => {
@@ -31,4 +31,10 @@ test('rampFromNow: holds a running fade, falls back to the current value', () =>
   expect(old.cancelScheduledValues).toHaveBeenCalledWith(3);
   expect(old.setValueAtTime).toHaveBeenCalledWith(0.8, 3);
   expect(old.linearRampToValueAtTime).toHaveBeenCalledWith(0, 4);
+});
+
+test('makeupGain: as the Web Audio compressor adds it', () => {
+  // measured in Chromium: a limiter at -3 dB / 20:1 raised a 0.5352 peak to 0.6517
+  close(makeupGain(-3, 20), 0.6517 / 0.5352, 1e-3);
+  expect(makeupGain(0, 20)).toBe(1);
 });
