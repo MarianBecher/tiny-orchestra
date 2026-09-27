@@ -1,6 +1,6 @@
 {
   "name": "tiny-orchestra",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A tiny orchestra for the browser: a dependency-free Web Audio sampler with a lookahead score scheduler, plus 25 compact orchestral instruments built from VSCO-2 Community Edition (CC0).",
   "type": "module",
   "license": "CC0-1.0",
