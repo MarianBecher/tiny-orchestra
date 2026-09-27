@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { LOOKAHEAD, LOOKAHEAD_HIDDEN, TICK_MS, startScheduler, type SchedulerOptions } from '../src/scheduler.ts';
 import { flattenScore, type ScoreEvent } from '../src/score.ts';
+import { LiveTimeline, tempoMap } from '../src/tempo.ts';
 import type { Score, Voice } from '../src/types.ts';
 import { close } from './helpers.ts';
 
@@ -128,5 +129,63 @@ describe('startScheduler', () => {
     advance(3);
     expect(planned).toHaveLength(before);
     expect(sched.running).toBe(false);
+  });
+
+  test('stop in the future: plans up to it, stops everything there', () => {
+    const { planned, sched, advance, onEnd } = setup();
+    sched.stop(11.2); // beat 2.4
+    expect(sched.running).toBe(true);
+    advance(3);
+    expect(planned.map((p) => p.midi)).toEqual([60, 62, 64]);
+    for (const p of planned) expect(p.voice.stoppedAt).toBe(11.2);
+    expect(sched.running).toBe(false);
+    expect(onEnd).not.toHaveBeenCalled();
+    sched.stop(10); // nothing to do any more
+  });
+
+  test('from: starts at a later beat of the score', () => {
+    const { planned, advance, sched } = setup({ from: 2 });
+    advance(2);
+    expect(planned.map((p) => p.midi)).toEqual([64, 65]);
+    close(planned[0]!.time, 10); // beat 2 sounds at the start time
+    close(sched.endTime, 11);
+  });
+
+  test('until: a loop that ends after two passes', () => {
+    const { planned, advance, onEnd, sched } = setup({ loop: true, until: 8 });
+    close(sched.endTime, 14);
+    advance(5);
+    expect(planned).toHaveLength(8);
+    expect(onEnd).toHaveBeenCalledTimes(1);
+  });
+
+  test('a timeline with a tempo change sets times and durations', () => {
+    const timeline = new LiveTimeline(tempoMap(120, [[2, 60]]), 10);
+    const { planned, advance, sched } = setup({ timeline });
+    advance(4);
+    expect(planned.map((p) => p.time)).toEqual([10, 10.5, 11, 12]);
+    close(planned[1]!.duration, 0.5);
+    close(planned[2]!.duration, 1);
+    close(sched.endTime, 13);
+  });
+
+  test('lookahead: plans as far as asked, e.g. everything at once', () => {
+    const { planned } = setup({ lookahead: 100 });
+    expect(planned).toHaveLength(4);
+  });
+
+  test('cues and beats are reported once, with their times, across loop passes', () => {
+    const cues: [number, number][] = [];
+    const beats: [number, number][] = [];
+    const { advance } = setup({
+      loop: true,
+      cues: [{ beat: 0 }, { beat: 2.5 }],
+      onCue: (_c, t, b) => cues.push([b, t]),
+      onBeat: (b, t) => beats.push([b, t]),
+    });
+    advance(3.95);
+    expect(cues).toEqual([[0, 10], [2.5, 11.25], [4, 12], [6.5, 13.25], [8, 14]]);
+    expect(beats.map((b) => b[0])).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);
+    beats.forEach(([b, t]) => close(t, 10 + b * 0.5));
   });
 });
