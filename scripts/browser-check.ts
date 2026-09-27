@@ -13,6 +13,9 @@
 //     - a 7 s violin note carries across the loop and fades out afterwards
 //     - no click (jumps) when stopping, no NaN
 //     - what this browser's decoder does with the MP3 delay
+//  4. orch.render(): a score with a tempo change, dynamics and the limiter
+//     lands its notes at the right times and encodes to WAV
+//  5. every score in examples/scores.ts renders without clipping
 
 import { spawn, execFileSync } from 'node:child_process';
 import { mkdtemp, rm, access, readdir } from 'node:fs/promises';
@@ -20,6 +23,7 @@ import type { AddressInfo } from 'node:net';
 import { tmpdir, homedir } from 'node:os';
 import { join } from 'node:path';
 import type * as Lib from '../src/index.ts';
+import { scores } from '../examples/scores.ts';
 import { startServer } from './serve.ts';
 
 async function findChrome(): Promise<string | null> {
@@ -171,6 +175,61 @@ const OFFLINE_TEST = async (sampleRate: number): Promise<OfflineResult> => {
   };
 };
 
+interface RenderResult {
+  seconds: number;
+  channels: number;
+  onsetsMs: number[];
+  nan: boolean;
+  peak: number;
+  crescendo: number;
+  wavBytes: number;
+}
+
+// Runs in the browser like OFFLINE_TEST. Woodblock on beats 0-3 at 120 bpm,
+// 60 bpm from beat 2 on: hits at 0, 0.5, 1.0 and 2.0 s. Violins with a
+// crescendo over beats 4-8 (3-7 s).
+const RENDER_TEST = async (limiter: boolean): Promise<RenderResult> => {
+  const lib = '/dist/index.js';
+  const { Orchestra, encodeWav } = (await import(lib)) as typeof Lib;
+  const orch = new Orchestra<string>(new OfflineAudioContext(2, 44100, 44100), { baseUrl: '/samples/', limiter });
+  const buf = await orch.render({
+    bpm: 120,
+    tempo: [[2, 60]],
+    lengthBeats: 8,
+    parts: [
+      { instrument: 'woodblock', velocity: 1, notes: [[0, null, 0.25], [1, null, 0.25], [2, null, 0.25], [3, null, 0.25]] },
+      { instrument: 'violins', velocity: 1, dynamics: [[4, 0.1], [8, 1, true]], notes: [[4, 'G4', 4]] },
+    ],
+  }, { tail: 1, bus: { reverb: 0 } });
+  const x = buf.getChannelData(0);
+  const sr = buf.sampleRate;
+  let peak = 0;
+  for (let i = 0; i < x.length; i++) peak = Math.max(peak, Math.abs(x[i]!));
+  // attack near each expected hit: first sample over 30 % of the local peak
+  const onsets = [0, 0.5, 1, 2].map((t) => {
+    const i0 = Math.max(0, Math.round((t - 0.1) * sr)), i1 = Math.round((t + 0.2) * sr);
+    let m = 0;
+    for (let i = i0; i < i1; i++) m = Math.max(m, Math.abs(x[i]!));
+    for (let i = i0; i < i1; i++) if (Math.abs(x[i]!) >= 0.3 * m) return (i / sr) * 1000;
+    return NaN;
+  });
+  const rms = (a: number, b: number) => {
+    let s = 0;
+    for (let i = Math.round(a * sr); i < Math.round(b * sr); i++) s += x[i]! * x[i]!;
+    return Math.sqrt(s / ((b - a) * sr));
+  };
+  return {
+    seconds: buf.duration,
+    channels: buf.numberOfChannels,
+    onsetsMs: onsets.map((o) => Math.round(o * 10) / 10),
+    nan: x.some((v) => !Number.isFinite(v)),
+    peak,
+    // the end of the crescendo against its start
+    crescendo: rms(6.3, 6.9) / rms(3.3, 3.9),
+    wavBytes: encodeWav(buf).byteLength,
+  };
+};
+
 async function main(): Promise<void> {
   const chrome = await findChrome();
   if (!chrome) {
@@ -258,6 +317,53 @@ async function main(): Promise<void> {
       if (!(r.rmsViolin['6-7s'] > 0.3 * r.rmsViolin['2-3s'])) problems.push(`${sr}: the violin does not carry across the loop`);
       if (!(r.rmsViolin['8.6-9.6s'] < 0.02 * r.rmsViolin['2-3s'])) problems.push(`${sr}: the violin does not fade out`);
       if (r.stopJumpRatio > 1.5) problems.push(`${sr}: jump when stopping (${r.stopJumpRatio.toFixed(2)})`);
+    }
+
+    // 4. render()
+    const r0 = await page.eval<RenderResult>(`(${RENDER_TEST.toString()})(false)`);
+    console.log('Render without limiter:', JSON.stringify(r0));
+    const r = await page.eval<RenderResult>(`(${RENDER_TEST.toString()})(true)`);
+    console.log('Render:', JSON.stringify(r));
+    // beats 0-2 at 120 bpm and 2-8 at 60 bpm: 1 s + 6 s, plus the tail
+    if (Math.abs(r.seconds - 8) > 0.01) problems.push(`render: ${r.seconds} s instead of 8`);
+    if (r.channels !== 2) problems.push(`render: ${r.channels} channels`);
+    // The two woodblock samples take 2.5 and 8 ms to 30 % of their peak (the
+    // round robin picks one at random); the limiter adds its lookahead (6 ms
+    // in Chromium) on top.
+    const want = [0, 500, 1000, 2000];
+    const late = (x: RenderResult, max: number) => x.onsetsMs.some((o, i) => !(o - want[i]! >= 0 && o - want[i]! < max));
+    if (late(r0, 10)) problems.push(`render: woodblock at ${r0.onsetsMs.join(', ')} ms, expected ${want.join(', ')}`);
+    if (late(r, 16)) problems.push(`render with limiter: woodblock at ${r.onsetsMs.join(', ')} ms, expected ${want.join(', ')}`);
+    if (r0.nan || r.nan) problems.push('render: NaN in the output');
+    // below the threshold the limiter changes nothing (its makeup gain is undone)
+    if (!(Math.abs(r.peak / r0.peak - 1) < 0.01)) problems.push(`render: the limiter changes the level (${r0.peak} -> ${r.peak})`);
+    if (!(r0.crescendo > 4)) problems.push(`render: crescendo only x${r0.crescendo.toFixed(2)}`);
+    if (r.wavBytes !== 44 + 8 * 44100 * 2 * 2) problems.push(`render: WAV has ${r.wavBytes} bytes`);
+
+    // 5. every example score renders cleanly
+    const pieces = await page.eval<{ name: string; seconds: number; peak: number; nan: boolean }[]>(`(async () => {
+      const { Orchestra } = await import('/dist/index.js');
+      const scores = ${JSON.stringify(scores)};
+      const orch = new Orchestra(new OfflineAudioContext(2, 44100, 44100), { baseUrl: '/samples/' });
+      const out = [];
+      for (const [name, score] of Object.entries(scores)) {
+        const buf = await orch.render(score, { tail: 2 });
+        const x = buf.getChannelData(0), y = buf.getChannelData(1);
+        let peak = 0, nan = false;
+        for (let i = 0; i < x.length; i++) {
+          const a = Math.max(Math.abs(x[i]), Math.abs(y[i]));
+          if (!Number.isFinite(a)) nan = true;
+          else if (a > peak) peak = a;
+        }
+        out.push({ name, seconds: buf.duration, peak, nan });
+      }
+      return out;
+    })()`);
+    for (const p of pieces) {
+      console.log(`Score ${p.name}: ${p.seconds.toFixed(1)} s, peak ${p.peak.toFixed(3)}`);
+      if (p.nan) problems.push(`score ${p.name}: NaN`);
+      if (!(p.peak > 0.05)) problems.push(`score ${p.name}: nearly silent (${p.peak})`);
+      if (!(p.peak < 1)) problems.push(`score ${p.name}: clips (${p.peak})`);
     }
 
     const errs = logs.concat(play.errors.map((e): [string, string] => ['page', e]));
