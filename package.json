@@ -39,6 +39,10 @@
       "types": "./dist/node.d.ts",
       "default": "./dist/node.js"
     },
+    "./midi": {
+      "types": "./dist/midi.d.ts",
+      "default": "./dist/midi.js"
+    },
     "./samples/*": "./samples/*",
     "./package.json": "./package.json"
   },
