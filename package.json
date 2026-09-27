@@ -22,6 +22,8 @@
     "samples",
     "vsco",
     "cc0",
+    "midi",
+    "wav",
     "game-audio"
   ],
   "engines": {

@@ -5,13 +5,14 @@
 
 A small orchestra for the browser: 25 instruments sampled from the
 [VSCO-2 Community Edition](https://github.com/sgossner/VSCO-2-CE), boiled down
-to 6.5 MB of MP3, and a Web Audio sampler that plays notes and whole scores.
+to 6.5 MB of MP3, and a Web Audio sampler that plays single notes, whole
+scores and MIDI files, live or rendered to WAV.
 
-I built this for a party game that needed a lobby waltz, a timpani roll and
-the national anthem of whatever country the round landed in, without loading
-anything from a CDN. It is one ES module and a folder of samples that you
-serve yourself. No dependencies, written in TypeScript, everything public
-domain.
+It is one ES module and a folder of samples that you serve yourself. No
+dependencies, written in TypeScript, everything public domain. Use it for
+music in web apps and games, sonification, teaching, sketching an
+arrangement, or anything else that needs a real-sounding orchestra without a
+DAW or a CDN.
 
 ## Install
 
@@ -21,7 +22,7 @@ npm install tiny-orchestra
 
 The package holds the library in `dist/` and the samples in `samples/`, a
 manifest plus one folder of MP3s per instrument. The samples have to end up
-on your web server. The Node entry tells you where they are, so a build step
+on a web server. The Node entry tells you where they are, so a build step
 can copy them:
 
 ```ts
@@ -32,73 +33,141 @@ await rm('public/audio/samples', { recursive: true, force: true });
 await cp(samplesDir(), 'public/audio/samples', { recursive: true });
 ```
 
+Or skip the copying and load them from a CDN that mirrors npm, with the
+version pinned: `baseUrl: 'https://cdn.jsdelivr.net/npm/tiny-orchestra@0/samples/'`.
+
 ## Usage
 
 ```ts
-import { Orchestra } from 'tiny-orchestra';
+import { Orchestra, sequence } from 'tiny-orchestra';
 
 const ctx = new AudioContext();
 const orch = new Orchestra(ctx, { baseUrl: '/audio/samples/' });
-await orch.load(['violins', 'harp', 'timpani', 'cymbal']);   // no argument loads everything
+orch.unlock();                                            // resume on the first click or key press
+await orch.load(['violins', 'harp', 'timpani', 'cymbal']);  // no argument loads everything
 
 const music = orch.bus({ gain: 0.8, reverb: 0.3 });
-orch.note({ instrument: 'harp', midi: 67, at: ctx.currentTime + 0.1, out: music });
+orch.note({ instrument: 'harp', midi: 'G4', at: ctx.currentTime + 0.1, out: music });
 
 const perf = orch.play({
   bpm: 96,
-  beatsPerBar: 4,
-  lengthBeats: 8,
   parts: [
-    { instrument: 'violins', velocity: 0.5, notes: [[0, 60, 4], [4, 62, 4]] },
+    { instrument: 'violins', name: 'strings', velocity: 0.5, notes: sequence('C4:4 D4') },
+    { instrument: 'harp', notes: sequence('C3:1/2 G3 C4 E4 G4 E4 C4 G3 | D3 A3 D4 F4 A4 F4 D4 A3') },
     { instrument: 'cymbal', variant: 'soft', notes: [[0, null, 1]] },
   ],
 }, { out: music, loop: true });
 
-perf.stop(1.5);      // fade out over 1.5 s
-music.fade(0, 2);    // or fade the whole bus
+perf.part('strings')?.fade(0, 2);   // take one part out
+perf.stop(1.5, perf.nextBar());     // fade out from the next bar line
 ```
 
 Browsers only make sound after a user gesture. Loading and scheduling work
-before that; `ctx.resume()` on the first click is all it takes.
+before that; `orch.unlock()` resumes the context on the first click, touch or
+key press.
 
-`load()` never throws and never fetches anything twice, so you can load the
-lobby music first and the rest of the orchestra while the game is already
-running. `orch.has('harp')` tells you what is ready.
+`load()` never throws and never fetches anything twice, so you can load a few
+instruments first and the rest while the page is already in use. It reports
+progress and can be aborted: `load(names, { onProgress, signal })`.
+`orch.has('harp')` tells you what is ready, `orch.unload()` frees memory
+again.
 
-A score is a list of parts, each with an instrument and notes as
-`[beat, midi, lengthBeats, velocity?, variant?]`. Beats are quarter notes at
-the score's tempo and may be fractional. Unpitched parts use `null` for the
-pitch and pick a variant instead. A part can also set `pan`, `transpose` and
-a default `velocity`; `play()` takes `at`, `bpm`, `transpose`, a `velocity`
-factor, `loop` and `out`, and returns a performance with `position` (in
-beats), `playing`, `stop()` and an `onEnd` callback for chaining pieces.
+The full API is in [docs/api.md](docs/api.md). An overview follows.
+
+### Notes
+
+`orch.note()` plays one note at an absolute context time: `instrument`, `midi`
+(a number or a name like `'F#4'`), `at`, `duration`, `velocity` (0 to 1,
+quadratic), `velocityEnd` for a crescendo or diminuendo within the note,
+`detune`, `pan`, `variant` and `out`. It returns a voice with `stop()`, or
+`null` when the instrument is not loaded yet, so an app does not break while
+its samples are still on the way.
+
+It picks the closest sample in the matching dynamic layer and repitches it.
+Sustained instruments (strings, winds, brass, rolls) loop as long as
+`duration` asks and then release; decaying ones (harp, pizzicato, mallets,
+percussion) ring out on their own. Each instrument keeps at most 32 voices
+(`maxVoices`); beyond that the oldest one is faded out quickly.
+
+### Scores
+
+A score is a tempo and a list of parts, each with an instrument and notes as
+`[beat, pitch, lengthBeats, velocity?, variant?]`. Beats are quarter notes
+and may be fractional; the pitch is a MIDI number or a note name, and `null`
+for unpitched instruments, which pick a variant instead. `sequence()` writes
+the notes of a part as text:
+
+```ts
+sequence('C4 D4 E4:2 | G4+B4+D5:4 r:1 x.soft@0.5')
+// note, note, a half note (lengths carry over), a chord, a rest, a soft hit at velocity 0.5
+```
+
+A score can also give `beatsPerBar`, `lengthBeats` and tempo changes, in steps
+or gradual: `tempo: [[16, 60, true]]` slows down to 60 bpm by beat 16. A part
+can set `name`, `gain`, `pan`, `transpose`, a default `velocity` and
+`dynamics`, a level curve over time: `dynamics: [[0, 0.2], [8, 1, true]]` is
+a crescendo over two bars.
+
+MIDI files become scores with `tiny-orchestra/midi`. General MIDI programs and
+drums are mapped onto the bundled instruments, or onto a mapping of your own:
+
+```ts
+import { midiToScore, parseMidi } from 'tiny-orchestra/midi';
+
+const score = midiToScore(parseMidi(await (await fetch('/bach.mid')).arrayBuffer()));
+orch.play(score);
+```
+
+A few example pieces that show the score format are in
+[examples/scores.ts](examples/scores.ts).
+
+### Performances
+
+`orch.play(score, options)` takes `at`, `from` (the beat to start at), `bpm`,
+`transpose`, a `velocity` factor, `loop`, `fadeIn` and `out`. It returns a
+performance:
+
+- `position` (in beats), `playing`, `endTime`, and `onEnd` for chaining pieces
+- `stop(fadeSeconds, at)`, now or at a later time
+- `nextBar()` and `nextBeat()` for doing things in time with the music, such
+  as starting the next piece on the next bar line:
+  `orch.play(next, { at: perf.nextBar() })`
+- `onBeat` and `onBar` callbacks, fired as the beat sounds, for anything
+  visual that should follow the music
+- `setTempo()` and `setTranspose()` while it plays
+- `part(name)` to fade single parts in and out, e.g. to add or drop layers of
+  an arrangement
 
 Playback runs on a lookahead scheduler, so `stop()` takes effect at once,
 loops cost nothing extra, and the music keeps going in a background tab.
+
+### Rendering
+
+`orch.render(score, options)` renders a score offline, much faster than real
+time, into an `AudioBuffer`; `encodeWav()` turns that into a WAV file:
+
+```ts
+import { encodeWav } from 'tiny-orchestra';
+
+const buffer = await orch.render(score, { repeat: 2, tail: 3 });
+const url = URL.createObjectURL(new Blob([encodeWav(buffer)], { type: 'audio/wav' }));
+```
+
+### Buses
+
+`orch.bus({ gain, reverb, pan })` is a mixer channel with `fade()`, `set()`
+and `dispose()`. Give separate groups of sounds a bus each, so they can be
+faded independently. All buses share one reverb whose impulse response is
+computed at start-up rather than downloaded; `new Orchestra(ctx, { reverb:
+false })` leaves it out. `limiter: true` puts a limiter in front of the
+output, so that many loud notes at once do not clip.
+
+### Types
 
 Instrument names are typed. `Orchestra`, `Score` and `Part` default to the
 union of the 25 bundled instruments, so `'violin'` instead of `'violins'` is
 a compile error. With a manifest of your own, pass it as `manifest` (an
 object or a URL) and use `new Orchestra<string>`.
-
-### Notes
-
-`orch.note()` takes `instrument`, `midi`, `at` (absolute context time),
-`duration`, `velocity` (0 to 1, quadratic), `detune`, `pan`, `variant` and
-`out`, and returns a voice with `stop()`. It picks the closest sample in the
-matching dynamic layer and repitches it. Sustained instruments (strings,
-winds, brass, rolls) loop as long as `duration` asks and then release;
-decaying ones (harp, pizzicato, mallets, percussion) ring out on their own.
-When the instrument is not loaded yet, the call returns `null` instead of
-throwing: a game should not crash because its music is still on the way.
-
-### Buses
-
-`orch.bus({ gain, reverb, pan })` is a mixer channel with `fade()`, `set()`
-and `dispose()`. Give music and sound effects a bus each so they can be faded
-independently. All buses share one reverb whose impulse response is computed
-at start-up rather than downloaded; `new Orchestra(ctx, { reverb: false })`
-leaves it out.
 
 ## Instruments
 
@@ -134,11 +203,12 @@ few semitones before it starts to sound like a chipmunk.
 ## Development
 
 ```sh
-make check      # typecheck, lint, tests
-make demo       # build and serve http://localhost:8321/demo/
+make check          # typecheck, lint, tests
+make demo           # build and serve http://localhost:8321/demo/
+make check-browser  # play the demo and render offline in headless Chromium
 ```
 
-Needs Node 22. The demo page plays every instrument and a short piece. The
+Needs Node 22. The demo page plays every instrument and a few pieces. The
 samples are cut, looped, levelled and pitch-checked by a script that
 downloads the VSCO-2 WAVs and encodes them with ffmpeg; how that works, and
 what the manifest fields mean, is written up in

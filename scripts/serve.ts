@@ -1,7 +1,7 @@
 // Tiny static server for the demo - no packages, just node:http.
 //
 // It serves the whole project directory, so the demo can load the library
-// from dist/ and the samples from samples/, just as a game would from its
+// from dist/ and the samples from samples/, just as an app would from its
 // own public folder.
 //
 //   npm run demo            -> http://localhost:8321/demo/
