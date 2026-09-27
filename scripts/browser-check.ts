@@ -16,9 +16,13 @@
 //  4. orch.render(): a score with a tempo change, dynamics and the limiter
 //     lands its notes at the right times and encodes to WAV
 //  5. every score in examples/scores.ts renders without clipping
+//  6. the site loads, draws a row per part, plays, reports broken code and
+//     hands over to changed code; its piece stays inside the instrument ranges
+//
+//   SCREENSHOTS=dir npm run check:browser   also saves screenshots of the site
 
 import { spawn, execFileSync } from 'node:child_process';
-import { mkdtemp, rm, access, readdir } from 'node:fs/promises';
+import { mkdtemp, rm, access, readdir, mkdir, writeFile } from 'node:fs/promises';
 import type { AddressInfo } from 'node:net';
 import { tmpdir, homedir } from 'node:os';
 import { join } from 'node:path';
@@ -365,6 +369,74 @@ async function main(): Promise<void> {
       if (!(p.peak > 0.05)) problems.push(`score ${p.name}: nearly silent (${p.peak})`);
       if (!(p.peak < 1)) problems.push(`score ${p.name}: clips (${p.peak})`);
     }
+
+    // 6. the site
+    await page.send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
+    await page.send('Page.navigate', { url: `http://127.0.0.1:${port}/site/` });
+    await page.eval('new Promise((r) => { const w = () => window.__site ? r() : setTimeout(w, 50); w(); })');
+    const site = await page.eval<{ rows: number; parts: number; notes: number; outOfRange: string[]; status: string }>(`(async () => {
+      await window.__site.ready;
+      const { orch } = window.__site;
+      const rows = document.querySelectorAll('#names .lane-name').length;
+      const notes = document.querySelectorAll('#notes rect.note').length;
+      const mod = await import(URL.createObjectURL(new Blob([document.getElementById('source').value], { type: 'text/javascript' })));
+      const { toMidi } = await import('/site/lib/index.js');
+      const outOfRange = [];
+      for (const p of mod.default.parts) {
+        const def = orch.manifest.instruments[p.instrument];
+        if (!def) { outOfRange.push(p.instrument + ' unknown'); continue; }
+        for (const n of p.notes) {
+          const m = toMidi(n[1]);
+          if (def.pitched && (m < def.range[0] || m > def.range[1])) outOfRange.push(p.name + ' ' + n[1] + ' at ' + n[0]);
+        }
+      }
+      return { rows, parts: mod.default.parts.length, notes, outOfRange, status: document.getElementById('status').textContent };
+    })()`);
+    console.log(`Site: ${site.rows} rows, ${site.notes} notes, status "${site.status}"`);
+    if (site.rows !== site.parts) problems.push(`site: ${site.rows} rows for ${site.parts} parts`);
+    if (!(site.notes > 100)) problems.push(`site: only ${site.notes} notes drawn`);
+    if (site.outOfRange.length) problems.push(`site: notes out of range: ${site.outOfRange.join(', ')}`);
+    const shots = process.env['SCREENSHOTS'];
+    const shoot = async (name: string) => {
+      if (!shots) return;
+      await mkdir(shots, { recursive: true });
+      const { data } = await page!.send<{ data: string }>('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true });
+      await writeFile(join(shots, `${name}.png`), Buffer.from(data, 'base64'));
+    };
+    await shoot('site-ready');
+    const played = await page.eval<{ state: string; pos: number; playhead: string; errors: string[] }>(`(async () => {
+      document.getElementById('play').click();
+      await new Promise((r) => setTimeout(r, 3000));
+      const d = window.__site;
+      return { state: d.ctx.state, pos: d.perf ? d.perf.position : -1, playhead: document.getElementById('playhead').style.transform, errors: [] };
+    })()`);
+    console.log(`Site playing: context ${played.state}, position ${played.pos.toFixed(2)}, playhead ${played.playhead}`);
+    if (played.state === 'running' && !(played.pos > 1)) problems.push(`site: the piece does not play (position ${played.pos})`);
+    await shoot('site-playing');
+    const edited = await page.eval<{ error: string; errorHidden: boolean; handedOver: boolean; errorAfter: boolean }>(`(async () => {
+      const d = window.__site;
+      const src = document.getElementById('source');
+      const good = src.value;
+      src.value = good.replace("sequence } from", "sequence, } from").replace('bpm: 72,', 'bpm: 72,,');
+      await d.runChanges();
+      const box = document.getElementById('error');
+      const error = box.textContent, errorHidden = box.hidden;
+      const before = d.perf;
+      src.value = good.replace("velocity: 0.6, pan: 0.2", "velocity: 0.7, pan: 0.2");
+      await d.runChanges();
+      const handedOver = d.perf !== null && d.perf !== before;
+      const errorAfter = !box.hidden;
+      document.getElementById('stop').click();
+      src.value = good;
+      return { error, errorHidden, handedOver, errorAfter };
+    })()`);
+    console.log(`Site editing: error "${edited.error}", handed over: ${edited.handedOver}`);
+    if (edited.errorHidden || !edited.error) problems.push('site: broken code shows no error');
+    if (edited.errorAfter) problems.push('site: the error stays after fixing the code');
+    if (played.state === 'running' && !edited.handedOver) problems.push('site: changed code does not take over');
+    await page.send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true });
+    await shoot('site-mobile');
+    await page.send('Emulation.clearDeviceMetricsOverride');
 
     const errs = logs.concat(play.errors.map((e): [string, string] => ['page', e]));
     if (errs.length) {
