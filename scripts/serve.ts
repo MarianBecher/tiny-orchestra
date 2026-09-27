@@ -9,6 +9,9 @@
 //   npm run demo            -> http://localhost:8321/demo/
 //   npm run site            -> http://localhost:8321/site/
 //   PORT=9000 npm run demo
+//
+// If 8321 is taken (say, the demo is already running), the next free port
+// is used; a PORT that is taken is an error.
 
 import { createServer, type Server } from 'node:http';
 import { createReadStream } from 'node:fs';
@@ -35,7 +38,9 @@ const ALIASES: [string, string][] = [['/site/lib/', '/dist/'], ['/site/samples/'
 // never served: downloads, dependencies, the repository itself
 const HIDDEN = ['cache', 'node_modules', '.git'].map((d) => `${sep}${d}${sep}`);
 
-export function startServer(port = Number(process.env['PORT']) || 8321, { quiet = false, start = '/demo/' } = {}): Promise<Server> {
+const DEFAULT_PORT = 8321;
+
+export function startServer(port = Number(process.env['PORT']) || DEFAULT_PORT, { quiet = false, start = '/demo/' } = {}): Promise<Server> {
   const root = normalize(ROOT);
   const server = createServer((req, res) => {
     void (async () => {
@@ -72,12 +77,28 @@ export function startServer(port = Number(process.env['PORT']) || 8321, { quiet 
       }
     })();
   });
-  return new Promise((resolve) => {
-    server.listen(port, () => {
+  const fallback = !process.env['PORT'] && port === DEFAULT_PORT;
+  return new Promise((resolve, reject) => {
+    let tries = 0;
+    server.on('error', (err: NodeJS.ErrnoException) => {
+      if (err.code === 'EADDRINUSE' && fallback && tries < 20) {
+        server.listen(port + ++tries);
+        return;
+      }
+      if (err.code === 'EADDRINUSE') err.message = `Port ${port + tries} is taken; choose another one with PORT=...`;
+      reject(err);
+    });
+    server.on('listening', () => {
       if (!quiet) console.log(`http://localhost:${(server.address() as AddressInfo).port}${start}`);
       resolve(server);
     });
+    server.listen(port);
   });
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) void startServer(undefined, { start: process.argv[2] ?? '/demo/' });
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  startServer(undefined, { start: process.argv[2] ?? '/demo/' }).catch((err: unknown) => {
+    console.error(err instanceof Error ? err.message : err);
+    process.exit(1);
+  });
+}
