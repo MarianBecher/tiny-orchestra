@@ -14,6 +14,10 @@ music in web apps and games, sonification, teaching, sketching an
 arrangement, or anything else that needs a real-sounding orchestra without a
 DAW or a CDN.
 
+**[Hear it live](https://marianbecher.github.io/tiny-orchestra/)**: two
+pieces as a score that follows the playback, with their code to edit and
+play again.
+
 ## Install
 
 ```sh
