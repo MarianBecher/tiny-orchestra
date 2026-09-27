@@ -15,7 +15,7 @@ import {
 import { LiveTimeline, repeating, tempoMap } from './tempo.ts';
 import type {
   Bus, BusOptions, LoadOptions, Manifest, ManifestInstrument, ManifestSample, NoteOptions, OrchestraOptions,
-  Output, PartControl, Performance, PlayOptions, Score, Voice,
+  Output, PartControl, Performance, PlayOptions, RenderOptions, Score, Voice,
 } from './types.ts';
 import type { InstrumentName } from './instruments.ts';
 
@@ -45,7 +45,10 @@ interface Loading {
 
 /** What `perform` needs beyond the PlayOptions. */
 interface PerformExtra {
-  /** onBeat / onBar. */
+  /** Beat at which it ends, looping or not. */
+  until?: number | undefined;
+  lookahead?: number | undefined;
+  /** onBeat / onBar; not for offline rendering. */
   callbacks?: boolean | undefined;
 }
 
@@ -56,6 +59,9 @@ const ATTACK_HIT = 0.001;
 const LOG = '[tiny-orchestra]';
 
 const nodeOf = (out: Output): AudioNode => ('input' in out ? out.input : out);
+
+const isOffline = (ctx: BaseAudioContext): ctx is OfflineAudioContext =>
+  typeof OfflineAudioContext !== 'undefined' && ctx instanceof OfflineAudioContext;
 
 /** Tempo map and timeline of a score played with these options. */
 function timelineFor(score: Score<string>, { bpm, from = 0, loop = false }: PlayOptions, start: number) {
@@ -84,6 +90,7 @@ export class Orchestra<I extends string = InstrumentName> {
   private readonly loading = new Map<string, Loading>();
   private readonly ready = new Map<string, LoadedInstrument>();
   private readonly fetchLimited = limiter(6);
+  private readonly options: OrchestraOptions<I>;
   /** Where buses and the reverb go: the limiter, or `destination`. */
   private readonly output: AudioNode;
   private readonly reverbIn: GainNode | null;
@@ -93,6 +100,7 @@ export class Orchestra<I extends string = InstrumentName> {
   constructor(ctx: BaseAudioContext, options: OrchestraOptions<I> = {}) {
     const { baseUrl, destination = ctx.destination, manifest, reverb = true, reverbSeconds = 2.6, limiter = false, maxVoices = 32 } = options;
     this.ctx = ctx;
+    this.options = options;
     this.destination = destination;
     this.baseUrl = withSlash(baseUrl ?? (typeof manifest === 'string' ? dirOf(manifest) : ''));
     this.manifestUrl = typeof manifest === 'string' ? manifest : this.baseUrl + 'manifest.json';
@@ -400,6 +408,31 @@ export class Orchestra<I extends string = InstrumentName> {
     return this.perform(score, options, { callbacks: true });
   }
 
+  /**
+   * Render a score offline, faster than real time, into an AudioBuffer -
+   * e.g. for `encodeWav()`. Loads whatever instruments the score needs
+   * first. Needs `OfflineAudioContext` (any browser).
+   */
+  async render(score: Score<I>, options: RenderOptions = {}): Promise<AudioBuffer> {
+    const { sampleRate = 44100, channels = 2, repeat = 1, tail = 3, bus, ...play } = options;
+    if (typeof OfflineAudioContext === 'undefined') throw new Error('render() needs OfflineAudioContext');
+    const names = new Set<I>(score.parts.map((p) => p.instrument));
+    if (names.has('timpani' as I)) names.add('timpaniRoll' as I); // variant 'roll'
+    const manifest = this.manifestData ?? (await this.load([]), this.manifestData);
+    await this.load([...names].filter((n) => !manifest || n in manifest.instruments));
+
+    const passes = Math.max(1, Math.floor(repeat));
+    const loop = passes > 1;
+    const { lengthBeats, timeline } = timelineFor(score, { ...play, loop }, 0);
+    const until = passes * lengthBeats;
+    const seconds = Math.max(0.1, timeline.time(until) + Math.max(0, tail));
+    const ctx = new OfflineAudioContext(channels, Math.ceil(seconds * sampleRate), sampleRate);
+    const child = new Orchestra<I>(ctx, { ...this.options, manifest: manifest ?? undefined, baseUrl: this.baseUrl });
+    for (const [n, inst] of this.ready) child.ready.set(n, { ...inst, last: null, voices: [] });
+    child.perform(score, { ...play, at: 0, loop, out: child.bus(bus ?? {}) }, { until, lookahead: seconds });
+    return ctx.startRendering();
+  }
+
   private perform(score: Score<I>, options: PlayOptions, extra: PerformExtra): Performance {
     const { at, transpose = 0, out, loop = false, velocity = 1, from = 0, fadeIn } = options;
     const ctx = this.ctx;
@@ -408,7 +441,9 @@ export class Orchestra<I extends string = InstrumentName> {
     const beatsPerBar = score.beatsPerBar || 4;
     const events = flattenScore(score, { velocity });
     const cues = flattenDynamics(score);
-    const until = loop ? Infinity : lengthBeats;
+    const until = extra.until ?? (loop ? Infinity : lengthBeats);
+    // An OfflineAudioContext has no clock to wait for: plan everything.
+    const lookahead = extra.lookahead ?? (isOffline(ctx) ? ctx.length / ctx.sampleRate - start + 1 : undefined);
 
     // A fader per performance, so stop() can fade out without touching the
     // bus, on which other things may still be playing.
@@ -526,6 +561,7 @@ export class Orchestra<I extends string = InstrumentName> {
       timeline,
       from,
       until,
+      lookahead,
       now: () => ctx.currentTime,
       schedule: (ev, time, duration) => this.note({
         instrument: ev.instrument as I, // came from the Score<I>
@@ -544,7 +580,7 @@ export class Orchestra<I extends string = InstrumentName> {
         param.setValueAtTime(cue.gain, time);
         if (cue.rampTo) param.linearRampToValueAtTime(cue.rampTo.gain, timeline.time(beat + cue.rampTo.beat - cue.beat));
       },
-      onBeat: extra.callbacks ? beatCallback : undefined,
+      onBeat: extra.callbacks && !isOffline(ctx) ? beatCallback : undefined,
       onEnd: () => {
         ended = true;
         disconnect(8); // let the reverb tail ring

@@ -22,5 +22,5 @@ export type {
   Manifest, ManifestFormat, ManifestInstrument, ManifestSample,
   Score, Part, ScoreNote, DynamicsPoint,
   Bus, BusOptions, Output, NoteOptions, Voice, PlayOptions, Performance, PartControl,
-  LoadOptions, OrchestraOptions,
+  LoadOptions, RenderOptions, OrchestraOptions,
 } from './types.ts';

@@ -253,3 +253,38 @@ describe('performances', () => {
     expect(beats).toEqual([0, 1, 2]);
   });
 });
+
+describe('render', () => {
+  test('plans the whole score at once into an OfflineAudioContext', async () => {
+    const contexts: ReturnType<typeof fakeContext>[] = [];
+    class FakeOffline {
+      length: number;
+      sampleRate: number;
+      constructor(_channels: number, length: number, sampleRate: number) {
+        const f = fakeContext();
+        f.raw.currentTime = 0;
+        contexts.push(f);
+        Object.assign(this, f.raw);
+        this.length = length;
+        this.sampleRate = sampleRate;
+      }
+      startRendering() { return Promise.resolve({ length: this.length }); }
+    }
+    vi.stubGlobal('OfflineAudioContext', FakeOffline);
+    stubFetch([]);
+    const orch = new Orchestra<string>(fakeContext().ctx, { manifest, reverb: false });
+    const buf = await orch.render(
+      { bpm: 120, parts: [{ instrument: 'woodblock', notes: [[0, null, 1], [2, null, 1]] }] },
+      { repeat: 2, tail: 1, sampleRate: 1000 },
+    );
+    expect(orch.has('woodblock')).toBe(true); // loaded on the way
+    expect(buf.length).toBe(5000); // 2 passes of 2 s + 1 s tail
+    const starts = contexts[0]!.sources.map((s) => s.started?.[0]);
+    expect(starts).toEqual([0, 1, 2, 3]);
+  });
+
+  test('without OfflineAudioContext it rejects', async () => {
+    const orch = new Orchestra<string>(fakeContext().ctx, { manifest, reverb: false });
+    await expect(orch.render({ bpm: 120, parts: [] })).rejects.toThrow(/OfflineAudioContext/);
+  });
+});

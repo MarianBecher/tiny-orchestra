@@ -256,6 +256,19 @@ export interface LoadOptions {
   signal?: AbortSignal | undefined;
 }
 
+export interface RenderOptions extends Omit<PlayOptions, 'at' | 'out' | 'loop' | 'fadeIn'> {
+  /** Default 44100. */
+  sampleRate?: number | undefined;
+  /** Default 2. */
+  channels?: number | undefined;
+  /** How often the score is played in a row. Default 1. */
+  repeat?: number | undefined;
+  /** Seconds added after the end for releases and the reverb. Default 3. */
+  tail?: number | undefined;
+  /** The bus the score is played into. Default: gain 1, reverb 0.25. */
+  bus?: BusOptions | undefined;
+}
+
 export interface OrchestraOptions<I extends string = InstrumentName> {
   /** Folder that holds `manifest.json` and the sample folders. */
   baseUrl?: string | undefined;
