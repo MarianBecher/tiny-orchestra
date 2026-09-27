@@ -184,6 +184,13 @@ export interface Performance {
   stop(fadeSeconds?: number): void;
 }
 
+export interface LoadOptions {
+  /** Called whenever a sample file has been loaded (or has failed): `loaded` of `total` files. */
+  onProgress?: ((loaded: number, total: number) => void) | undefined;
+  /** Aborts the downloads this call started; `load()` then resolves early. */
+  signal?: AbortSignal | undefined;
+}
+
 export interface OrchestraOptions<I extends string = InstrumentName> {
   /** Folder that holds `manifest.json` and the sample folders. */
   baseUrl?: string | undefined;

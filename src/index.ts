@@ -20,5 +20,6 @@ export { makeImpulse, type ImpulseOptions } from './reverb.ts';
 export type {
   Manifest, ManifestFormat, ManifestInstrument, ManifestSample,
   Score, Part, ScoreNote,
-  Bus, BusOptions, Output, NoteOptions, Voice, PlayOptions, Performance, OrchestraOptions,
+  Bus, BusOptions, Output, NoteOptions, Voice, PlayOptions, Performance,
+  LoadOptions, OrchestraOptions,
 } from './types.ts';

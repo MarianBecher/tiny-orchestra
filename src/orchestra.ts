@@ -10,7 +10,7 @@ import { createBus, createReverb, rampFromNow } from './reverb.ts';
 import { startScheduler, type Scheduler } from './scheduler.ts';
 import { beatToTime, flattenScore, scoreLength, timeToBeat, wrapPosition } from './score.ts';
 import type {
-  Bus, BusOptions, Manifest, ManifestInstrument, ManifestSample, NoteOptions, OrchestraOptions,
+  Bus, BusOptions, LoadOptions, Manifest, ManifestInstrument, ManifestSample, NoteOptions, OrchestraOptions,
   Output, Performance, PlayOptions, Score, Voice,
 } from './types.ts';
 import type { InstrumentName } from './instruments.ts';
@@ -27,6 +27,14 @@ interface LoadedInstrument extends Omit<ManifestInstrument, 'samples'> {
   samples: LoadedSample[];
   /** Last unpitched sample played, for the round robin. */
   last: LoadedSample | null;
+}
+
+/** An instrument being loaded: the whole of it, and each file. */
+interface Loading {
+  promise: Promise<void>;
+  files: Promise<unknown>[];
+  /** Of the load() call that started it. */
+  signal: AbortSignal | undefined;
 }
 
 // Fade-in at the offset, only against clicks - the attack is in the sample.
@@ -52,7 +60,7 @@ export class Orchestra<I extends string = InstrumentName> {
   private readonly manifestUrl: string;
   private manifestData: Manifest<I> | null = null;
   private manifestPromise: Promise<Manifest<I>> | null = null;
-  private readonly loading = new Map<string, Promise<void>>();
+  private readonly loading = new Map<string, Loading>();
   private readonly ready = new Map<string, LoadedInstrument>();
   private readonly fetchLimited = limiter(6);
   private readonly reverbIn: GainNode | null;
@@ -95,7 +103,8 @@ export class Orchestra<I extends string = InstrumentName> {
    * throws - whatever is missing is simply missing, with a console warning.
    * Calling it again loads nothing twice.
    */
-  async load(instruments?: readonly I[]): Promise<void> {
+  async load(instruments?: readonly I[], options: LoadOptions = {}): Promise<void> {
+    const { onProgress, signal } = options;
     if (!this.manifestPromise) {
       this.manifestPromise = fetch(this.manifestUrl).then(async (r) => {
         if (!r.ok) throw new Error(`manifest.json: HTTP ${r.status}`);
@@ -111,37 +120,92 @@ export class Orchestra<I extends string = InstrumentName> {
       this.manifestPromise = null; // try again on the next load()
       return;
     }
+    if (signal?.aborted) return;
     // the manifest decides what exists at runtime, whatever the types say
     const all = Object.keys(manifest.instruments) as I[];
     const wanted = instruments ?? all;
     for (const n of wanted) if (!all.includes(n)) console.warn(`${LOG} unknown instrument: ${n}`);
-    await Promise.all(wanted.filter((n) => all.includes(n)).map((n) => this.loadInstrument(manifest, n)));
+    const entries = wanted.filter((n) => all.includes(n)).map((n) => this.loadInstrument(manifest, n, signal));
+    let finished = false;
+    if (onProgress) {
+      const files = entries.flatMap((e) => e.files);
+      let done = 0;
+      for (const f of files) void f.then(() => { if (!finished) onProgress(++done, files.length); });
+    }
+    const aborted = new Promise<void>((resolve) => signal?.addEventListener('abort', () => {
+      // forget right away what this call started, so the next load() starts afresh
+      for (const [n, e] of this.loading) if (e.signal === signal) this.loading.delete(n);
+      resolve();
+    }, { once: true }));
+    await Promise.race([Promise.all(entries.map((e) => e.promise)), aborted]);
+    finished = true;
   }
 
-  private loadInstrument(manifest: Manifest<I>, name: I): Promise<void> {
-    let p = this.loading.get(name);
-    if (!p) {
-      const def = manifest.instruments[name]!;
-      p = Promise.all(def.samples.map((s) => this.fetchLimited(async (): Promise<LoadedSample> => {
-        const res = await fetch(this.baseUrl + s.file);
-        if (!res.ok) throw new Error(`${s.file}: HTTP ${res.status}`);
-        const buffer = await decode(this.ctx, await res.arrayBuffer());
-        return { ...s, buffer, shift: shiftFor(s, buffer) };
-      }).catch((err: unknown) => {
-        console.warn(`${LOG} ${name}: ${err instanceof Error ? err.message : String(err)}`);
-        return null;
-      }))).then((loaded) => {
-        const samples = loaded.filter((s): s is LoadedSample => s !== null);
-        if (!samples.length) {
-          console.warn(`${LOG} ${name} is missing (no sample could be loaded)`);
-          return;
-        }
-        // An instrument that lacks only some samples stays usable with the rest.
-        this.ready.set(name, { ...def, name, samples, last: null });
-      });
-      this.loading.set(name, p);
+  private loadInstrument(manifest: Manifest<I>, name: I, signal: AbortSignal | undefined): Loading {
+    const known = this.loading.get(name);
+    if (known) return known;
+    const def = manifest.instruments[name]!;
+    const files = def.samples.map((s) => this.fetchLimited(async (): Promise<LoadedSample> => {
+      if (signal?.aborted) throw new Error('aborted');
+      const res = await fetch(this.baseUrl + s.file, signal ? { signal } : undefined);
+      if (!res.ok) throw new Error(`${s.file}: HTTP ${res.status}`);
+      const buffer = await decode(this.ctx, await res.arrayBuffer());
+      return { ...s, buffer, shift: shiftFor(s, buffer) };
+    }).catch((err: unknown) => {
+      if (!signal?.aborted) console.warn(`${LOG} ${name}: ${err instanceof Error ? err.message : String(err)}`);
+      return null;
+    }));
+    const entry: Loading = { files, signal, promise: Promise.resolve() };
+    entry.promise = Promise.all(files).then((loaded) => {
+      // unloaded or aborted in the meantime: forget it
+      if (this.loading.get(name) !== entry || signal?.aborted) return;
+      const samples = loaded.filter((s): s is LoadedSample => s !== null);
+      if (!samples.length) {
+        console.warn(`${LOG} ${name} is missing (no sample could be loaded)`);
+        return;
+      }
+      // An instrument that lacks only some samples stays usable with the rest.
+      this.ready.set(name, { ...def, name, samples, last: null });
+    });
+    this.loading.set(name, entry);
+    return entry;
+  }
+
+  /**
+   * Forget instruments (no argument: all of them), so their audio can be
+   * garbage collected. Notes that are sounding play on; a later `load()`
+   * fetches them again.
+   */
+  unload(instruments?: readonly I[]): void {
+    const names: string[] = instruments ? [...instruments] : [...this.loading.keys(), ...this.ready.keys()];
+    for (const n of names) {
+      this.loading.delete(n);
+      this.ready.delete(n);
     }
-    return p;
+  }
+
+  /**
+   * Browsers keep an AudioContext suspended until the user interacts with
+   * the page. This resumes it on the first click, touch or key press on
+   * `target` (default: the document); the promise resolves once it runs.
+   */
+  unlock(target?: EventTarget): Promise<void> {
+    const ctx = this.ctx as Partial<AudioContext> & BaseAudioContext;
+    if (typeof ctx.resume !== 'function' || ctx.state === 'running') return Promise.resolve();
+    const el = target ?? (typeof document !== 'undefined' ? document : null);
+    if (!el) return ctx.resume();
+    const events = ['pointerdown', 'keydown', 'touchend'];
+    return new Promise((resolve) => {
+      const off = () => events.forEach((e) => el.removeEventListener(e, on, true));
+      const on = () => {
+        void ctx.resume!().then(() => {
+          if (ctx.state !== 'running') return;
+          off();
+          resolve();
+        }, () => { /* not allowed yet - wait for the next gesture */ });
+      };
+      events.forEach((e) => el.addEventListener(e, on, true));
+    });
   }
 
   private defaultOut(): AudioNode {
