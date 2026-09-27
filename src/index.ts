@@ -1,8 +1,8 @@
 // tiny-orchestra - a tiny orchestra for the browser.
 //
 // A dependency-free sampler on Web Audio plus the pure helpers it is built
-// from (sample choice, pitch math, beats -> time), which are exported so they
-// can be tested and reused without an AudioContext.
+// from (sample choice, pitch math, beats -> time, note names, WAV), which are
+// exported so they can be tested and reused without an AudioContext.
 
 export { Orchestra, type LoadedSample } from './orchestra.ts';
 export { INSTRUMENT_NAMES, type InstrumentName } from './instruments.ts';
@@ -13,6 +13,7 @@ export {
 } from './score.ts';
 export { tempoMap, repeating, LiveTimeline, type TempoChange, type TempoMap, type Timeline } from './tempo.ts';
 export { noteToMidi, midiToNote, toMidi, sequence, type SequenceOptions } from './notes.ts';
+export { encodeWav, type AudioData, type WavOptions } from './wav.ts';
 export { startScheduler, LOOKAHEAD, LOOKAHEAD_HIDDEN, TICK_MS, type Scheduler, type SchedulerOptions } from './scheduler.ts';
 export { detectOnset, decoderShift, MP3_PRIMING } from './onset.ts';
 export { makeImpulse, type ImpulseOptions } from './reverb.ts';
