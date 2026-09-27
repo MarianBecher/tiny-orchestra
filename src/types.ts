@@ -6,6 +6,7 @@
 // use `string` (or your own union).
 
 import type { InstrumentName } from './instruments.ts';
+import type { TempoChange } from './tempo.ts';
 
 /** One audio file in the manifest. All times are seconds on the file's own timeline. */
 export interface ManifestSample {
@@ -70,20 +71,34 @@ export interface Manifest<I extends string = string> {
 }
 
 /**
- * One note of a score: `[beat, midi, lengthBeats, velocity?, variant?]`.
- * `midi` is null for unpitched parts; `velocity` defaults to the part's.
+ * One note of a score: `[beat, pitch, lengthBeats, velocity?, variant?]`.
+ * `pitch` is a MIDI number or a note name (`"F#4"`), null for unpitched
+ * parts; `velocity` defaults to the part's.
  */
 export type ScoreNote = [
   beat: number,
-  midi: number | null,
+  midi: number | string | null,
   lengthBeats: number,
   velocity?: number | undefined,
   variant?: string | undefined,
 ];
 
+/**
+ * A point of a part's dynamics: from `beat` on the part plays at `level`
+ * (0..1, quadratic like velocity, 1 = as written). With `ramp`, it gets
+ * there gradually from the previous point - a crescendo or diminuendo.
+ */
+export type DynamicsPoint = [beat: number, level: number, ramp?: boolean | undefined];
+
 export interface Part<I extends string = InstrumentName> {
   instrument: I;
   notes: ScoreNote[];
+  /** Name to address the part in `performance.part(name)`. */
+  name?: string;
+  /** Level of the part, 0..1 (linear, like a fader). Default 1. Changeable while playing. */
+  gain?: number;
+  /** Dynamics over time; see `DynamicsPoint`. Before the first point, its level. */
+  dynamics?: DynamicsPoint[];
   /** Default velocity of the part's notes, 0..1. Default 0.7. */
   velocity?: number;
   /** Stereo position -1..1. */
@@ -95,7 +110,10 @@ export interface Part<I extends string = InstrumentName> {
 }
 
 export interface Score<I extends string = InstrumentName> {
+  /** Tempo at the start, in quarter notes per minute. */
   bpm: number;
+  /** Tempo changes, see `TempoChange`. On a loop, every pass starts at `bpm` again. */
+  tempo?: TempoChange[];
   /** Default 4. */
   beatsPerBar?: number;
   /** Length in beats; if missing, the notes rounded up to whole bars. */
@@ -160,21 +178,39 @@ export interface Voice {
 export interface PlayOptions {
   /** Absolute AudioContext time. Default: 50 ms from now. */
   at?: number | undefined;
-  /** Overrides `score.bpm`. */
+  /** Beat of the score to start from. Default 0. */
+  from?: number | undefined;
+  /** Overrides `score.bpm`; tempo changes of the score are scaled along. */
   bpm?: number | undefined;
   /** Semitones added to every pitched note. */
   transpose?: number | undefined;
   /** Multiplies every velocity. Default 1. */
   velocity?: number | undefined;
   loop?: boolean | undefined;
+  /** Fade in over this many seconds instead of starting at full level. */
+  fadeIn?: number | undefined;
   out?: Output | undefined;
+}
+
+/** A part of a running performance, see `Performance.part()`. */
+export interface PartControl {
+  readonly index: number;
+  readonly name: string | undefined;
+  /** Ramp the part's level to `gain` (0..1) over `seconds` (default 1). */
+  fade(gain: number, seconds?: number): void;
+  /** Set the level with a 20 ms ramp. */
+  set(gain: number): void;
 }
 
 export interface Performance {
   readonly startTime: number;
+  /** Current tempo at the start of the score (`setTempo` changes it). */
   readonly bpm: number;
+  readonly beatsPerBar: number;
   readonly lengthBeats: number;
   readonly loop: boolean;
+  /** Semitones added to every pitched note (`setTranspose` changes it). */
+  readonly transpose: number;
   /** AudioContext time of the end; `Infinity` when looping. */
   readonly endTime: number;
   /** Current position in beats (wrapped when looping). */
@@ -182,8 +218,35 @@ export interface Performance {
   readonly playing: boolean;
   /** Called at the natural end (never after `stop()`, never when looping). */
   onEnd: ((performance: Performance) => void) | null;
-  /** Fade out and cancel notes that are planned but not yet sounding. Default 0.5 s. */
-  stop(fadeSeconds?: number): void;
+  /**
+   * Called on every beat, as close to when it sounds as the main thread
+   * manages. `beat` counts from the start of the score (across loop passes),
+   * `time` is the exact AudioContext time of the beat.
+   */
+  onBeat: ((beat: number, time: number) => void) | null;
+  /** Like `onBeat`, on the first beat of every bar; `bar` counts from 0. */
+  onBar: ((bar: number, time: number) => void) | null;
+  /** AudioContext time at which `beat` (counted like in `onBeat`) sounds. */
+  timeOf(beat: number): number;
+  /**
+   * AudioContext time of the next bar line at or after `after` (default:
+   * now plus a moment to plan). For starting or stopping something in time
+   * with the music: `play(next, { at: perf.nextBar() })`.
+   */
+  nextBar(after?: number): number;
+  /** Like `nextBar`, for the next beat. */
+  nextBeat(after?: number): number;
+  /** Change the tempo; takes effect after the notes already planned (under half a second). */
+  setTempo(bpm: number): void;
+  /** Change the transposition of notes planned from now on. */
+  setTranspose(semitones: number): void;
+  /** A part by name or index, to change its level while playing; null if there is none. */
+  part(nameOrIndex: string | number): PartControl | null;
+  /**
+   * Fade out over `fadeSeconds` (default 0.5) from `at` (AudioContext time,
+   * default now), and cancel notes that would start later.
+   */
+  stop(fadeSeconds?: number, at?: number): void;
 }
 
 export interface LoadOptions {

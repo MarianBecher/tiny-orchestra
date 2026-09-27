@@ -1,5 +1,7 @@
 import { describe, expect, test } from 'vitest';
-import { beatToTime, collectEvents, flattenScore, scoreLength, timeToBeat, wrapPosition } from '../src/score.ts';
+import {
+  barAt, beatToTime, collectEvents, dynamicsAt, flattenDynamics, flattenScore, nextBarBeat, scoreLength, timeToBeat, wrapPosition,
+} from '../src/score.ts';
 import type { Score } from '../src/types.ts';
 import { close } from './helpers.ts';
 
@@ -83,4 +85,63 @@ test('wrapPosition', () => {
   expect(wrapPosition(9.5, 8, true)).toBe(1.5);
   expect(wrapPosition(9.5, 8, false)).toBe(8);
   expect(wrapPosition(3, 8, false)).toBe(3);
+});
+
+test('flattenScore: note names, part index', () => {
+  const ev = flattenScore({ parts: [
+    { instrument: 'a', notes: [[1, 'C4', 1]] },
+    { instrument: 'b', transpose: 2, notes: [[0, 'A4', 1], [2, 'nope', 1]] },
+  ] });
+  expect(ev.map((e) => [e.beat, e.part, e.midi])).toEqual([[0, 1, 71], [1, 0, 60], [2, 1, NaN]]);
+});
+
+describe('bars', () => {
+  test('nextBarBeat without loop, up to the end', () => {
+    expect(nextBarBeat(0, 4, 16, false)).toBe(0);
+    expect(nextBarBeat(0.1, 4, 16, false)).toBe(4);
+    expect(nextBarBeat(4, 4, 16, false)).toBe(4);
+    expect(nextBarBeat(3.9999999999, 4, 16, false)).toBe(4);
+    expect(nextBarBeat(13, 4, 14, false)).toBe(14);
+  });
+
+  test('nextBarBeat with loop: every pass starts a bar', () => {
+    expect(nextBarBeat(17, 4, 16, true)).toBe(20);
+    expect(nextBarBeat(9, 3, 10, true)).toBe(9);
+    expect(nextBarBeat(9.5, 3, 10, true)).toBe(10); // the next would be 12, past the end of the pass
+    expect(nextBarBeat(10.5, 3, 10, true)).toBe(13);
+  });
+
+  test('barAt counts bars, per pass when looping', () => {
+    expect(barAt(8, 4, 16, false)).toBe(2);
+    expect(barAt(9, 4, 16, false)).toBeNull();
+    // 10 beats in 3/4: bars at 0, 3, 6, 9 - four per pass
+    expect([0, 3, 6, 9, 10, 13].map((b) => barAt(b, 3, 10, true))).toEqual([0, 1, 2, 3, 4, 5]);
+    expect(barAt(12, 3, 10, true)).toBeNull();
+  });
+});
+
+describe('dynamics', () => {
+  const parts = [
+    { instrument: 'a', notes: [], dynamics: [[4, 1, true], [2, 0.5]] as [number, number, boolean?][] },
+    { instrument: 'b', notes: [] },
+  ];
+
+  test('flattenDynamics: sorted, gain = level squared, a first point at beat 0, ramps with their start', () => {
+    expect(flattenDynamics({ parts })).toEqual([
+      { beat: 0, part: 0, gain: 0.25, rampTo: null },
+      { beat: 2, part: 0, gain: 0.25, rampTo: { beat: 4, gain: 1 } },
+      { beat: 4, part: 0, gain: 1, rampTo: null },
+    ]);
+  });
+
+  test('dynamicsAt: steps, ramps, and 1 without dynamics', () => {
+    const d = parts[0]!.dynamics;
+    expect(dynamicsAt(d, 1)).toEqual({ gain: 0.25, rampTo: null });
+    const mid = dynamicsAt(d, 3);
+    close(mid.gain, 0.625);
+    expect(mid.rampTo).toEqual({ beat: 4, gain: 1 });
+    expect(dynamicsAt(d, 9)).toEqual({ gain: 1, rampTo: null });
+    expect(dynamicsAt(undefined, 3)).toEqual({ gain: 1, rampTo: null });
+    expect(dynamicsAt([[0, 2]], 0).gain).toBe(1); // clamped
+  });
 });

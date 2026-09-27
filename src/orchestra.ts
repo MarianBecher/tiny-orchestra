@@ -9,10 +9,13 @@ import { detectOnset, decoderShift } from './onset.ts';
 import { midiToFreq, pickSample, pickVariant, playbackRate, velocityGain } from './pitch.ts';
 import { createBus, createLimiter, createReverb, rampFromNow } from './reverb.ts';
 import { startScheduler, type Scheduler } from './scheduler.ts';
-import { beatToTime, flattenScore, scoreLength, timeToBeat, wrapPosition } from './score.ts';
+import {
+  barAt, dynamicsAt, flattenDynamics, flattenScore, nextBarBeat, scoreLength, wrapPosition, type DynamicsCue,
+} from './score.ts';
+import { LiveTimeline, repeating, tempoMap } from './tempo.ts';
 import type {
   Bus, BusOptions, LoadOptions, Manifest, ManifestInstrument, ManifestSample, NoteOptions, OrchestraOptions,
-  Output, Performance, PlayOptions, Score, Voice,
+  Output, PartControl, Performance, PlayOptions, Score, Voice,
 } from './types.ts';
 import type { InstrumentName } from './instruments.ts';
 
@@ -40,6 +43,12 @@ interface Loading {
   signal: AbortSignal | undefined;
 }
 
+/** What `perform` needs beyond the PlayOptions. */
+interface PerformExtra {
+  /** onBeat / onBar. */
+  callbacks?: boolean | undefined;
+}
+
 // Fade-in at the offset, only against clicks - the attack is in the sample.
 // Shorter for hits, where the sample already starts just before the peak.
 const ATTACK = 0.003;
@@ -47,6 +56,15 @@ const ATTACK_HIT = 0.001;
 const LOG = '[tiny-orchestra]';
 
 const nodeOf = (out: Output): AudioNode => ('input' in out ? out.input : out);
+
+/** Tempo map and timeline of a score played with these options. */
+function timelineFor(score: Score<string>, { bpm, from = 0, loop = false }: PlayOptions, start: number) {
+  const base = score.bpm > 0 ? score.bpm : 120;
+  const factor = bpm !== undefined && bpm > 0 ? bpm / base : 1;
+  const lengthBeats = scoreLength(score);
+  const map = tempoMap(base, score.tempo);
+  return { base, lengthBeats, timeline: new LiveTimeline(loop ? repeating(map, lengthBeats) : map, start, from, factor) };
+}
 
 /**
  * The sampler. `I` is the set of instrument names it accepts: by default the
@@ -375,68 +393,161 @@ export class Orchestra<I extends string = InstrumentName> {
 
   /**
    * Play a score. It is planned only a short stretch ahead (see
-   * scheduler.ts), so `stop()` takes effect at once and loops run forever.
+   * scheduler.ts), so `stop()` takes effect at once, loops run forever and
+   * the tempo can change while it plays.
    */
   play(score: Score<I>, options: PlayOptions = {}): Performance {
-    const { at, bpm, transpose = 0, out, loop = false, velocity = 1 } = options;
+    return this.perform(score, options, { callbacks: true });
+  }
+
+  private perform(score: Score<I>, options: PlayOptions, extra: PerformExtra): Performance {
+    const { at, transpose = 0, out, loop = false, velocity = 1, from = 0, fadeIn } = options;
     const ctx = this.ctx;
-    const tempo = bpm || score.bpm || 120;
-    const events = flattenScore(score, { transpose, velocity });
-    const lengthBeats = scoreLength(score);
     const start = Math.max(at !== undefined && Number.isFinite(at) ? at : ctx.currentTime + 0.05, ctx.currentTime);
+    const { base, lengthBeats, timeline } = timelineFor(score, { ...options, loop }, start);
+    const beatsPerBar = score.beatsPerBar || 4;
+    const events = flattenScore(score, { velocity });
+    const cues = flattenDynamics(score);
+    const until = loop ? Infinity : lengthBeats;
 
     // A fader per performance, so stop() can fade out without touching the
     // bus, on which other things may still be playing.
     const gain = ctx.createGain();
+    if (fadeIn !== undefined && fadeIn > 0) {
+      gain.gain.setValueAtTime(0, start);
+      gain.gain.linearRampToValueAtTime(1, start + fadeIn);
+    }
     gain.connect(out ? nodeOf(out) : this.defaultOut());
 
-    let stopped = false;
+    // Per part: a fader for part(...).fade(), and a gain for the dynamics.
+    const localFrom = loop && lengthBeats > 0 ? from - Math.floor(from / lengthBeats) * lengthBeats : from;
+    const parts = score.parts.map((p, index) => {
+      const fader = ctx.createGain();
+      fader.gain.value = Math.max(0, p.gain ?? 1);
+      fader.connect(gain);
+      let input = fader;
+      if (p.dynamics?.length) {
+        input = ctx.createGain();
+        const { gain: g0, rampTo } = dynamicsAt(p.dynamics, localFrom);
+        input.gain.setValueAtTime(g0, start);
+        // starting in the middle of a ramp: finish it
+        if (rampTo) input.gain.linearRampToValueAtTime(rampTo.gain, timeline.time(from + rampTo.beat - localFrom));
+        input.connect(fader);
+      }
+      const control: PartControl = {
+        index,
+        name: p.name,
+        fade: (g, seconds = 1) => rampFromNow(ctx, fader.gain, Math.max(0, g), Math.max(0.01, seconds)),
+        set: (g) => rampFromNow(ctx, fader.gain, Math.max(0, g), 0.02),
+      };
+      return { input, fader, control };
+    });
+
+    let tr = transpose;
+    let stopFrom = Infinity;
     let ended = false;
     let scheduler: Scheduler | null = null;
+    const disconnect = (afterSeconds: number) => setTimeout(() => {
+      gain.disconnect();
+      for (const p of parts) { p.input.disconnect(); p.fader.disconnect(); }
+    }, afterSeconds * 1000);
 
     const perf: Performance = {
       startTime: start,
-      bpm: tempo,
+      beatsPerBar,
       lengthBeats,
       loop,
-      endTime: loop ? Infinity : beatToTime(lengthBeats, start, tempo),
+      get bpm() {
+        return base * timeline.factor;
+      },
+      get transpose() {
+        return tr;
+      },
+      get endTime() {
+        return Number.isFinite(until) ? timeline.time(until) : Infinity;
+      },
       onEnd: null,
+      onBeat: null,
+      onBar: null,
       get position() {
-        return wrapPosition(timeToBeat(ctx.currentTime, start, tempo), lengthBeats, loop);
+        return wrapPosition(Math.max(from, timeline.beat(ctx.currentTime)), lengthBeats, loop);
       },
       get playing() {
-        return !stopped && !ended;
+        return !ended && ctx.currentTime < stopFrom;
       },
-      stop: (fadeSeconds = 0.5) => {
-        if (stopped) return;
-        stopped = true;
+      timeOf: (beat) => timeline.time(beat),
+      nextBar: (after) => {
+        const b = Math.max(from, timeline.beat(after ?? Math.max(ctx.currentTime + 0.05, start)));
+        return timeline.time(nextBarBeat(b, beatsPerBar, lengthBeats, loop));
+      },
+      nextBeat: (after) => {
+        const b = Math.max(from, timeline.beat(after ?? Math.max(ctx.currentTime + 0.05, start)));
+        return timeline.time(Math.min(Math.ceil(b - 1e-9), until));
+      },
+      setTempo: (bpm) => {
+        if (!(bpm > 0) || !scheduler?.running) return;
+        // from what is planned on, so nothing already scheduled moves
+        timeline.setFactor(bpm / base, Math.max(scheduler.planned, timeline.beat(ctx.currentTime)));
+      },
+      setTranspose: (semitones) => {
+        if (Number.isFinite(semitones)) tr = semitones;
+      },
+      part: (key) => (typeof key === 'number' ? parts[key] : parts.find((p) => p.control.name === key))?.control ?? null,
+      stop: (fadeSeconds = 0.5, when) => {
+        const now = ctx.currentTime;
+        const from = Math.max(when ?? now, now);
+        if (from >= stopFrom || ended) return;
+        stopFrom = from;
         const f = Math.max(0.02, fadeSeconds);
-        rampFromNow(ctx, gain.gain, 0, f);
-        scheduler?.stop(ctx.currentTime + f);
-        setTimeout(() => gain.disconnect(), (f + 0.2) * 1000);
+        if (from <= now) rampFromNow(ctx, gain.gain, 0, f);
+        else {
+          if (typeof gain.gain.cancelAndHoldAtTime === 'function') gain.gain.cancelAndHoldAtTime(from);
+          else { gain.gain.cancelScheduledValues(from); gain.gain.setValueAtTime(gain.gain.value, from); }
+          gain.gain.linearRampToValueAtTime(0, from + f);
+        }
+        scheduler?.stop(from + f);
+        disconnect(from - now + f + 0.2);
       },
     };
 
-    scheduler = startScheduler({
+    const beatCallback = (beat: number, time: number): void => {
+      setTimeout(() => {
+        if (time >= stopFrom) return;
+        perf.onBeat?.(beat, time);
+        const bar = barAt(beat, beatsPerBar, lengthBeats, loop);
+        if (bar !== null) perf.onBar?.(bar, time);
+      }, Math.max(0, (time - ctx.currentTime) * 1000));
+    };
+
+    scheduler = startScheduler<DynamicsCue>({
       events,
       lengthBeats,
       loop,
-      startTime: start,
-      bpm: tempo,
+      timeline,
+      from,
+      until,
       now: () => ctx.currentTime,
       schedule: (ev, time, duration) => this.note({
         instrument: ev.instrument as I, // came from the Score<I>
-        midi: ev.midi,
+        midi: ev.midi === null ? null : ev.midi + tr,
         at: time,
         duration,
         velocity: ev.velocity,
         pan: ev.pan,
         variant: ev.variant,
-        out: gain,
+        out: parts[ev.part]?.input ?? gain,
       }),
+      cues,
+      onCue: (cue, time, beat) => {
+        const param = parts[cue.part]?.input.gain;
+        if (!param) return;
+        param.setValueAtTime(cue.gain, time);
+        if (cue.rampTo) param.linearRampToValueAtTime(cue.rampTo.gain, timeline.time(beat + cue.rampTo.beat - cue.beat));
+      },
+      onBeat: extra.callbacks ? beatCallback : undefined,
       onEnd: () => {
         ended = true;
-        setTimeout(() => gain.disconnect(), 8000); // let the reverb tail ring
+        disconnect(8); // let the reverb tail ring
         perf.onEnd?.(perf);
       },
     });
