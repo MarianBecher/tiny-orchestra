@@ -2,6 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/tiny-orchestra)](https://www.npmjs.com/package/tiny-orchestra)
 [![CI](https://github.com/MarianBecher/tiny-orchestra/actions/workflows/ci.yml/badge.svg)](https://github.com/MarianBecher/tiny-orchestra/actions/workflows/ci.yml)
+[![Built with Claude Code](https://img.shields.io/badge/built%20with-Claude%20Code-d97757)](https://claude.com/claude-code)
 
 A small orchestra for the browser: 25 instruments sampled from the
 [VSCO-2 Community Edition](https://github.com/sgossner/VSCO-2-CE), boiled down
@@ -222,6 +223,13 @@ downloads the VSCO-2 WAVs and encodes them with ffmpeg; how that works, and
 what the manifest fields mean, is written up in
 [docs/building-samples.md](docs/building-samples.md) and
 [docs/manifest.md](docs/manifest.md).
+
+## How this was made
+
+The code, tests and docs were written by Claude (Anthropic) with Claude
+Code, directed and reviewed by me. CI runs the type check, lint and the
+test suite on every push, and `npm run check:browser` plays the built
+library in a real browser.
 
 ## Credits and license
 
